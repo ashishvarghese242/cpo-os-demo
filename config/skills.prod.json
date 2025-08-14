@@ -1,7 +1,7 @@
 [
-  { "id": "flow",     "label": "Delivery Flow",        "target": 5.0 },
-  { "id": "review",   "label": "Code Review",          "target": 5.0 },
-  { "id": "reliable", "label": "Release Reliability",  "target": 5.0 },
-  { "id": "recovery", "label": "Recovery Discipline",  "target": 5.0 },
-  { "id": "eff",      "label": "Flow Efficiency",      "target": 5.0 }
+  { "id": "flow",     "label": "Delivery Flow (Small PRs)",   "target": 4.2 },
+  { "id": "review",   "label": "Code Review Discipline",      "target": 4.3 },
+  { "id": "reliable", "label": "Change Failure Prevention",   "target": 4.4 },
+  { "id": "recovery", "label": "Incident Recovery (MTTR)",    "target": 4.3 },
+  { "id": "eff",      "label": "WIP & Throughput Efficiency", "target": 4.1 }
 ]
