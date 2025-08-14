@@ -1,0 +1,4 @@
+[
+  { "ticket_id":"t1","account_id":"a1","opened_at":"2025-02-08","closed_at":"2025-02-08","severity":"low","first_response_min":18,"resolution_min":120 },
+  { "ticket_id":"t2","account_id":"a2","opened_at":"2025-02-09","closed_at":"2025-02-10","severity":"high","first_response_min":60,"resolution_min":1440 }
+]
