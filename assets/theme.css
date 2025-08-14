@@ -19,11 +19,14 @@
   --chart-target-line: rgba(106, 0, 255, 1);
   --chart-influence-fill: rgba(0, 209, 255, 0.18);
   --chart-influence-line: rgba(0, 209, 255, 1);
+  --chart-training-fill: rgba(0, 209, 255, 0.18); /* cyan, visible but not overpowering */
+  --chart-training-line: rgba(0, 209, 255, 1);
 
   /* UI polish */
   --radius: 16px;
   --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
 }
+
 
 *{ box-sizing: border-box; }
 body{
