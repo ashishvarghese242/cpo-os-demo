@@ -9,17 +9,26 @@ async function loadJson(path) {
 
 async function bootstrap() {
   try {
-    const [modes, kpis] = await Promise.all([
+    console.log("[CPO] main.js loaded");
+    const [modes, kpis, skillsSales, skillsCS, skillsProd] = await Promise.all([
       loadJson("./config/modes.json"),
       loadJson("./config/kpis.json"),
+      loadJson("./config/skills.sales.json"),
+      loadJson("./config/skills.cs.json"),
+      loadJson("./config/skills.prod.json"),
     ]);
 
-    window.__CONFIG = { modes, kpis };
+    window.__CONFIG = {
+      modes,
+      kpis,
+      skills: { sales: skillsSales, cs: skillsCS, prod: skillsProd }
+    };
 
     const rootEl = document.getElementById("root");
     const React = window.React;
     const ReactDOM = window.ReactDOM;
 
+    if (!React || !ReactDOM) throw new Error("React/ReactDOM not available");
     ReactDOM.createRoot(rootEl).render(React.createElement(App));
   } catch (err) {
     const rootEl = document.getElementById("root");
@@ -28,11 +37,10 @@ async function bootstrap() {
         <div class="card">
           <h3>Could not start the demo</h3>
           <div class="muted">${(err && err.message) || err}</div>
-          <div class="muted">Check that <code>/config/modes.json</code> and <code>/config/kpis.json</code> exist and are valid JSON.</div>
+          <div class="muted">Check that all /config/*.json files exist.</div>
         </div>
-      </div>
-    `;
-    console.error(err);
+      </div>`;
+    console.error("[CPO] bootstrap error:", err);
   }
 }
 
