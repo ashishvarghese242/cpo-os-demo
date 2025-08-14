@@ -1,32 +1,33 @@
-/* assets/theme.css  — CPO site-inspired theme */
+/* assets/theme.css — CPO site-inspired theme */
 :root{
   /* Base */
-  --bg: #e9f0f7;             /* light bluish background (matches site sections) */
+  --bg: #e9f0f7;
   --card: #ffffff;
-  --text: #0f172a;           /* slate-900 */
-  --muted: #6b7280;          /* slate-500/600 */
+  --text: #0f172a;
+  --muted: #6b7280;
   --line: #e5e7eb;
 
-  /* Brand accents (inspired by hero gradient & AI chip imagery) */
-  --accent: #6a00ff;         /* electric purple */
-  --accent-2: #00d1ff;       /* cyan */
-  --accent-warm: #ffd166;    /* warm highlight from site imagery */
+  /* Brand accents */
+  --accent: #6a00ff;      /* electric purple */
+  --accent-2: #00d1ff;    /* cyan */
+  --accent-warm: #ffd166; /* warm highlight */
 
   /* Chart colors */
-  --chart-actual-fill: rgba(15, 23, 42, 0.20);
+  --chart-actual-fill: rgba(15, 23, 42, 0.45);
   --chart-actual-line: rgba(15, 23, 42, 1);
-  --chart-target-fill: rgba(106, 0, 255, 0.15);
+  --chart-target-fill: rgba(106, 0, 255, 0.18);
   --chart-target-line: rgba(106, 0, 255, 1);
-  --chart-influence-fill: rgba(0, 209, 255, 0.18);
+  --chart-influence-fill: rgba(0, 209, 255, 0.20);
   --chart-influence-line: rgba(0, 209, 255, 1);
-  --chart-training-fill: rgba(0, 209, 255, 0.18); /* cyan, visible but not overpowering */
-  --chart-training-line: rgba(0, 209, 255, 1);
 
-  /* UI polish */
+  /* NEW: training overlay colors (high contrast) */
+  --chart-training-fill: rgba(255, 172, 28, 0.22); /* orange fill */
+  --chart-training-line: rgba(255, 172, 28, 1);    /* orange line */
+
+  /* UI */
   --radius: 16px;
   --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
 }
-
 
 *{ box-sizing: border-box; }
 body{
@@ -44,10 +45,13 @@ body{
   padding: 16px;
   box-shadow: var(--shadow);
 }
+
 header{
   display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;
 }
-.brand h2{ margin:0 }
+
+.brand { display:flex; gap:12px; align-items:center; }
+.brand h2{ margin:0; font-size:22px; }
 .brand .tag{ color: var(--muted); font-size:12px }
 
 select, button{
@@ -62,5 +66,19 @@ select, button{
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color:#fff; font-weight:700; padding:8px 12px; border-radius: 999px;
 }
+
+.hero {
+  border-radius: var(--radius);
+  background: radial-gradient(1200px 400px at 20% -20%, rgba(106,0,255,0.25), transparent),
+              radial-gradient(1200px 400px at 80% -30%, rgba(0,209,255,0.20), transparent),
+              #0B1020;
+  color: #fff;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.hero h1 { margin: 0; font-size: 20px; }
+.hero p  { margin: 6px 0 0 0; color: rgba(255,255,255,0.8); font-size: 13px; }
+
 table th, table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
 table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
