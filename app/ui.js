@@ -1,43 +1,53 @@
 // app/ui.js
 import { getState, setState, subscribe } from "./state.js";
+import { idealPersona, seededScores } from "../lib/compute.js";
+import { renderRadar } from "../lib/charts.js";
 
 const React = window.React;
 
 function useStore() {
   const { useEffect, useState } = React;
   const [snap, setSnap] = useState(getState());
-  useEffect(() => {
-    const unsub = subscribe(setSnap);
-    return unsub;
-  }, []);
+  useEffect(() => subscribe(setSnap), []);
   return [snap, setState];
 }
 
 function Card({ title, children }) {
-  return React.createElement(
-    "div",
-    { className: "card" },
+  return React.createElement("div", { className:"card" },
     React.createElement("h3", { style:{margin:"0 0 8px 0"} }, title),
     children
   );
 }
 
-export default function App() {
-  const { useMemo } = React;
-  const [snap, set] = useStore();
+function IdealPersonaRadar({ mode, seed }) {
+  const { useEffect, useRef } = React;
+  const canvasRef = useRef(null);
+  const cfg = window.__CONFIG;
+  const { labels, targets } = idealPersona(mode, cfg.skills);
+  const actual = seededScores(labels.length, seed); // placeholder until we wire real scores
 
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    renderRadar(canvasRef.current, labels, [
+      { label: "Ideal Persona (Target)", data: targets, backgroundColor:"rgba(124,58,237,0.15)", borderColor:"rgba(124,58,237,1)", borderWidth:2, pointRadius:2 },
+      { label: "Current (Demo)", data: actual, backgroundColor:"rgba(17,24,39,0.20)", borderColor:"rgba(17,24,39,1)", borderWidth:2, pointRadius:2 }
+    ]);
+  }, [mode, seed, labels.join("|"), JSON.stringify(targets)]);
+
+  return React.createElement("div", { style:{height:360} },
+    React.createElement("canvas", { ref: canvasRef })
+  );
+}
+
+export default function App() {
+  const [snap, set] = useStore();
   const cfg = window.__CONFIG || {};
   const modes = (cfg.modes && cfg.modes.modes) || ["Sales","CS","Production"];
   const kpisByMode = cfg.kpis || { Sales:["WinRate","ACV","Velocity"], CS:["NRR","TTFV","TTR","RenewalRate"], Production:["DeployFreq","LeadTime","ChangeFailure","MTTR"] };
+  const kpiList = (kpisByMode[snap.mode] || []);
 
-  const kpiList = useMemo(() => kpisByMode[snap.mode] || [], [snap.mode, kpisByMode]);
-
-  return React.createElement(
-    "div",
-    { className: "wrap" },
-    React.createElement(
-      "header",
-      null,
+  return React.createElement("div", { className:"wrap" },
+    React.createElement("header", null,
       React.createElement("div", null,
         React.createElement("h2", { style:{margin:0} }, "CPO OS Demo"),
         React.createElement("div", { className:"muted" }, "Zero‑custody • KPI‑first • Modular")
@@ -46,7 +56,11 @@ export default function App() {
         React.createElement("select", {
           value: snap.mode,
           onChange: e => set({ mode: e.target.value, selectedKpi: (kpisByMode[e.target.value]||[])[0] || "" })
-        }, modes.map(m => React.createElement("option", { key:m, value:m }, m)))
+        }, modes.map(m => React.createElement("option", { key:m, value:m }, m))),
+        " ",
+        React.createElement("button", { onClick: () => set({ seed: (snap.seed + 1) % 1000000 }) }, "Regenerate"),
+        " ",
+        React.createElement("button", { onClick: () => set({ seed: 42 }) }, "Reset")
       )
     ),
 
@@ -56,13 +70,8 @@ export default function App() {
       React.createElement("div", null, "Available KPIs: ", kpiList.join(", ") || "—")
     ),
 
-    React.createElement(Card, { title: "What’s next" },
-      React.createElement("ul", null,
-        React.createElement("li", null, "Add skills config files (five per mode, 0–5 targets)."),
-        React.createElement("li", null, "Wire charts and calculators as separate modules."),
-        React.createElement("li", null, "Publish updates via GitHub Pages automatically.")
-      )
+    React.createElement(Card, { title: "Ideal Persona Radar" },
+      React.createElement(IdealPersonaRadar, { mode: snap.mode, seed: snap.seed })
     )
   );
 }
-
