@@ -1,7 +1,7 @@
 // app/ui.js
 import { getState, setState, subscribe } from "./state.js";
-import { idealPersona, seededScores, sampleCohort, skillScores, performanceGaps } from "../lib/compute.js";
-import { renderRadar } from "../lib/charts.js";
+import { idealPersona, sampleCohort, skillScores, performanceGaps } from "../lib/compute.js";
+import { renderRadar, dsActual, dsTarget, dsInfluence } from "../lib/charts.js";
 import { influenceScores } from "../lib/influence.js";
 import { rankRecommendations } from "../lib/reco.js";
 import { computeROI } from "../lib/roi.js";
@@ -36,36 +36,34 @@ export default function App() {
   const kpisByMode = cfg.kpis || { Sales:["WinRate","ACV","Velocity"], CS:["NRR","TTFV","TTR","RenewalRate"], Production:["DeployFreq","LeadTime","ChangeFailure","MTTR"] };
   const skillsCfg = cfg.skills;
 
-  const skillsArr =
-    snap.mode === "Sales" ? skillsCfg.sales :
-    snap.mode === "CS" ? skillsCfg.cs : skillsCfg.prod;
-
   const { labels, targets, ids } = idealPersona(snap.mode, skillsCfg);
   const currentSkills = skillScores(snap.mode, skillsCfg, snap.seed);
   const gaps = performanceGaps(currentSkills, targets, ids, labels);
 
   const cohort = sampleCohort(snap.mode, skillsCfg, 7, 80);
   const influence = influenceScores(labels, cohort);
-
   const recos = rankRecommendations({ mode: snap.mode, gaps, influence });
 
-  // charts
+  // chart renderers with theme colors
   function renderIdeal(el){
+    const a = dsActual(), t = dsTarget();
     renderRadar(el, labels, [
-      { label: "Ideal Persona (Target)", data: targets, backgroundColor:"rgba(124,58,237,0.15)", borderColor:"rgba(124,58,237,1)", borderWidth:2, pointRadius:2 },
-      { label: "Current (Demo)", data: currentSkills, backgroundColor:"rgba(17,24,39,0.20)", borderColor:"rgba(17,24,39,1)", borderWidth:2, pointRadius:2 }
+      { label: "Ideal Persona (Target)", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2 },
+      { label: "Current (Demo)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2 }
     ]);
   }
   function renderInfluence(el){
+    const i = dsInfluence();
     renderRadar(el, labels, [
       { label: (snap.selectedKpi || "KPI") + " Influence", data: influence.map(i=>i.score0to5),
-        backgroundColor:"rgba(59,130,246,0.15)", borderColor:"rgba(59,130,246,1)", borderWidth:2, pointRadius:2 }
+        backgroundColor:i.fill, borderColor:i.line, borderWidth:2, pointRadius:2 }
     ]);
   }
   function renderPerformance(el){
+    const a = dsActual(), t = dsTarget();
     renderRadar(el, labels, [
-      { label: "Target", data: targets, backgroundColor:"rgba(124,58,237,0.10)", borderColor:"rgba(124,58,237,0.8)", borderWidth:2, pointRadius:2 },
-      { label: "Actual", data: currentSkills, backgroundColor:"rgba(239,68,68,0.20)", borderColor:"rgba(239,68,68,1)", borderWidth:2, pointRadius:2 }
+      { label: "Target", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2 },
+      { label: "Actual", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2 }
     ]);
   }
 
@@ -78,10 +76,20 @@ export default function App() {
   const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
   return React.createElement("div", { className:"wrap" },
+
+    // Hero strip (brand touch, Step 6)
+    React.createElement("div", { className:"hero" },
+      React.createElement("h1", null, "Transform Enablement from Cost Center to Growth Engine"),
+      React.createElement("p", null, "Zero‑custody • KPI‑first • Built for C‑levels")
+    ),
+
     React.createElement("header", null,
-      React.createElement("div", null,
-        React.createElement("h2", { style:{margin:0} }, "CPO OS Demo"),
-        React.createElement("div", { className:"muted" }, "Zero‑custody • KPI‑first • Modular")
+      React.createElement("div", { className:"brand" },
+        React.createElement("span", { className:"badge" }, "CPO OS"),
+        React.createElement("div", null,
+          React.createElement("h2", null, "Demo Simulator"),
+          React.createElement("div", { className:"tag" }, "Persona → Influence → Performance → ROI")
+        )
       ),
       React.createElement("div", null,
         React.createElement("select", {
