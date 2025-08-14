@@ -1,7 +1,7 @@
 [
-  { "id": "onboarding", "label": "Onboarding Execution",       "target": 5.0 },
-  { "id": "activation", "label": "Feature Activation Coaching","target": 5.0 },
-  { "id": "triage",     "label": "Ticket Triage Efficiency",   "target": 5.0 },
-  { "id": "qbr",        "label": "QBR Cadence",                "target": 5.0 },
-  { "id": "renewal",    "label": "Renewal Forecasting",        "target": 5.0 }
+  { "id": "onboarding", "label": "Onboarding Execution",        "target": 4.5 },
+  { "id": "activation", "label": "Feature Activation Coaching", "target": 4.3 },
+  { "id": "triage",     "label": "Ticket Triage Efficiency",    "target": 4.2 },
+  { "id": "qbr",        "label": "QBR Cadence",                  "target": 4.0 },
+  { "id": "renewal",    "label": "Renewal Forecasting",          "target": 4.2 }
 ]
