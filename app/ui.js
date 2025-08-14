@@ -73,7 +73,7 @@ export default function App() {
   const cohort = sampleCohort(snap.mode, skillsCfg, 7, 120);
   const influence = influenceScores(labels, cohort);
 
-  // NEW: training leverage layer (0..5 per skill)
+  // training leverage (0..5 per skill)
   const leverageMap = leverageForCohort(snap.mode, personIds, data);
   const leverageArray = ids.map(id => leverageMap[id] ?? 0);
 
@@ -88,13 +88,16 @@ export default function App() {
   const roi = computeROI({ mode: snap.mode, recos });
   const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
-  // chart renderers — now include training overlay
+  // chart renderers — include training overlay with strong contrast & dashed line
   function renderIdeal(el){
     const a = dsActual(), t = dsTarget(), tr = dsTraining();
     renderRadar(el, labels, [
-      { label: "Ideal Persona (Target)", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
-      { label: "Current (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 },
-      { label: "Training Impact (LRS)", data: leverageArray, backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 }
+      { label: "Ideal Persona (Target)", data: targets,
+        backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
+      { label: "Training Impact (LRS)", data: leverageArray,
+        backgroundColor:tr.fill, borderColor:tr.line, borderWidth:3, borderDash:[8,6], pointRadius:2, order:2 },
+      { label: "Current (Cohort Avg)", data: currentSkills,
+        backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 }
     ]);
   }
   function renderInfluence(el){
@@ -103,15 +106,18 @@ export default function App() {
       { label: `${primaryKpi} Influence`, data: influence.map(i=>i.score0to5),
         backgroundColor:i.fill, borderColor:i.line, borderWidth:2, pointRadius:2, order:1 },
       { label: "Training Impact (LRS)", data: leverageArray,
-        backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 }
+        backgroundColor:tr.fill, borderColor:tr.line, borderWidth:3, borderDash:[8,6], pointRadius:2, order:2 }
     ]);
   }
   function renderPerformance(el){
     const a = dsActual(), t = dsTarget(), tr = dsTraining();
     renderRadar(el, labels, [
-      { label: "Target", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
-      { label: "Training Impact (LRS)", data: leverageArray, backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 },
-      { label: "Actual (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 }
+      { label: "Target", data: targets,
+        backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
+      { label: "Training Impact (LRS)", data: leverageArray,
+        backgroundColor:tr.fill, borderColor:tr.line, borderWidth:3, borderDash:[8,6], pointRadius:2, order:2 },
+      { label: "Actual (Cohort Avg)", data: currentSkills,
+        backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 }
     ]);
   }
 
@@ -197,7 +203,25 @@ export default function App() {
       React.createElement(Table, { columns:["Skill","Actual","Target","Gap","Training"], rows: gapRows })
     ),
 
-    React.createElement(Card, { title: "Top Content Drivers (Observed)" },
+    React.createElement(Card, { title: "Recommended Content (KPI‑linked training for this cohort/person)" },
+      contentRecs.length
+        ? contentRecs.map(block =>
+            React.createElement("div", { key:block.skill, style:{marginBottom:8} },
+              React.createElement("strong", null, block.skill, ` (Gap +${block.gap.toFixed(1)})`),
+              React.createElement("ul", null,
+                block.items.map(it =>
+                  React.createElement("li", { key: it.content_id },
+                    `${it.title} — ${it.type} • Expected skill lift: ${(it.expected_skill_lift*100).toFixed(0)}%`,
+                    it.used ? ` • Current usage: ${it.used}` : ""
+                  )
+                )
+              )
+            )
+          )
+        : React.createElement("div", { className:"muted" }, "No catalog items found for this mode.")
+    ),
+
+    React.createElement(Card, { title: "Top Content Drivers (Observed from LRS)" },
       React.createElement("ul", null,
         contentDrivers.map(c => React.createElement("li", { key:c.content_id },
           `${c.title} — ${c.type} • Skill: ${c.skill_id} • Used: ${c.used} • Driver: ${c.driver}`
@@ -206,20 +230,15 @@ export default function App() {
       React.createElement("div", { className:"muted" }, "Driver = cohort usage × expected skill lift (synthetic).")
     ),
 
-    React.createElement(Card, { title: "Content Recommendations (for the selected cohort/person)" },
-      contentRecs.map(block =>
-        React.createElement("div", { key:block.skill, style:{marginBottom:8} },
-          React.createElement("strong", null, block.skill, ` (Gap +${block.gap.toFixed(1)})`),
-          React.createElement("ul", null,
-            block.items.map(it =>
-              React.createElement("li", { key: it.content_id },
-                `${it.title} — ${it.type} • Expected skill lift: ${(it.expected_skill_lift*100).toFixed(0)}%`,
-                it.used ? ` • Current usage: ${it.used}` : ""
-              )
-            )
-          )
-        )
-      )
+    React.createElement(Card, { title: "Cohort Drilldown" },
+      React.createElement(Table, { columns: ["Person","KPI"].concat(labels), rows: personIds.slice(0,50).map(pid => {
+        const p = persons.find(x=>x.id===pid);
+        const s = skillScoresForPerson(snap.mode, skillsCfg, pid, data);
+        const k = kpiForPerson(snap.mode, data, pid);
+        const row = { Person: p?.name || pid, KPI: k };
+        labels.forEach((lab, i) => row[lab] = s[i].toFixed(1));
+        return row;
+      }) })
     ),
 
     React.createElement(Card, { title: "ROI / COI Overview" },
