@@ -1,7 +1,9 @@
 // app/ui.js
 import { getState, setState, subscribe } from "./state.js";
-import { idealPersona, seededScores } from "../lib/compute.js";
+import { idealPersona, seededScores, sampleCohort, skillScores, performanceGaps } from "../lib/compute.js";
 import { renderRadar } from "../lib/charts.js";
+import { influenceScores } from "../lib/influence.js";
+import { rankRecommendations } from "../lib/reco.js";
 
 const React = window.React;
 
@@ -19,24 +21,11 @@ function Card({ title, children }) {
   );
 }
 
-function IdealPersonaRadar({ mode, seed }) {
+function RadarCanvas({ height=360, render }) {
   const { useEffect, useRef } = React;
-  const canvasRef = useRef(null);
-  const cfg = window.__CONFIG;
-  const { labels, targets } = idealPersona(mode, cfg.skills);
-  const actual = seededScores(labels.length, seed); // placeholder until we wire real scores
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    renderRadar(canvasRef.current, labels, [
-      { label: "Ideal Persona (Target)", data: targets, backgroundColor:"rgba(124,58,237,0.15)", borderColor:"rgba(124,58,237,1)", borderWidth:2, pointRadius:2 },
-      { label: "Current (Demo)", data: actual, backgroundColor:"rgba(17,24,39,0.20)", borderColor:"rgba(17,24,39,1)", borderWidth:2, pointRadius:2 }
-    ]);
-  }, [mode, seed, labels.join("|"), JSON.stringify(targets)]);
-
-  return React.createElement("div", { style:{height:360} },
-    React.createElement("canvas", { ref: canvasRef })
-  );
+  const ref = useRef(null);
+  useEffect(() => { if (ref.current) render(ref.current); }, [render]);
+  return React.createElement("div", { style:{height} }, React.createElement("canvas", { ref }));
 }
 
 export default function App() {
@@ -44,7 +33,48 @@ export default function App() {
   const cfg = window.__CONFIG || {};
   const modes = (cfg.modes && cfg.modes.modes) || ["Sales","CS","Production"];
   const kpisByMode = cfg.kpis || { Sales:["WinRate","ACV","Velocity"], CS:["NRR","TTFV","TTR","RenewalRate"], Production:["DeployFreq","LeadTime","ChangeFailure","MTTR"] };
-  const kpiList = (kpisByMode[snap.mode] || []);
+  const skillsCfg = cfg.skills;
+
+  const skillsArr =
+    snap.mode === "Sales" ? skillsCfg.sales :
+    snap.mode === "CS" ? skillsCfg.cs : skillsCfg.prod;
+
+  const { labels, targets, ids } = idealPersona(snap.mode, skillsCfg);
+  const currentSkills = skillScores(snap.mode, skillsCfg, snap.seed);
+  const gaps = performanceGaps(currentSkills, targets, ids, labels);
+
+  const cohort = sampleCohort(snap.mode, skillsCfg, 7, 80);
+  const influence = influenceScores(labels, cohort);
+
+  const recos = rankRecommendations({ mode: snap.mode, gaps, influence });
+
+  // charts
+  function renderIdeal(el){
+    renderRadar(el, labels, [
+      { label: "Ideal Persona (Target)", data: targets, backgroundColor:"rgba(124,58,237,0.15)", borderColor:"rgba(124,58,237,1)", borderWidth:2, pointRadius:2 },
+      { label: "Current (Demo)", data: currentSkills, backgroundColor:"rgba(17,24,39,0.20)", borderColor:"rgba(17,24,39,1)", borderWidth:2, pointRadius:2 }
+    ]);
+  }
+  function renderInfluence(el){
+    renderRadar(el, labels, [
+      { label: (snap.selectedKpi || "KPI") + " Influence", data: influence.map(i=>i.score0to5),
+        backgroundColor:"rgba(59,130,246,0.15)", borderColor:"rgba(59,130,246,1)", borderWidth:2, pointRadius:2 }
+    ]);
+  }
+  function renderPerformance(el){
+    renderRadar(el, labels, [
+      { label: "Target", data: targets, backgroundColor:"rgba(124,58,237,0.10)", borderColor:"rgba(124,58,237,0.8)", borderWidth:2, pointRadius:2 },
+      { label: "Actual", data: currentSkills, backgroundColor:"rgba(239,68,68,0.20)", borderColor:"rgba(239,68,68,1)", borderWidth:2, pointRadius:2 }
+    ]);
+  }
+
+  const kpiOptions = kpisByMode[snap.mode] || [];
+  const ensureKpi = () => {
+    if (!kpiOptions.includes(snap.selectedKpi)) {
+      set({ selectedKpi: kpiOptions[0] || "" });
+    }
+  };
+  ensureKpi();
 
   return React.createElement("div", { className:"wrap" },
     React.createElement("header", null,
@@ -58,20 +88,46 @@ export default function App() {
           onChange: e => set({ mode: e.target.value, selectedKpi: (kpisByMode[e.target.value]||[])[0] || "" })
         }, modes.map(m => React.createElement("option", { key:m, value:m }, m))),
         " ",
+        React.createElement("select", {
+          value: snap.selectedKpi,
+          onChange: e => set({ selectedKpi: e.target.value })
+        }, (kpiOptions).map(k => React.createElement("option", { key:k, value:k }, k))),
+        " ",
         React.createElement("button", { onClick: () => set({ seed: (snap.seed + 1) % 1000000 }) }, "Regenerate"),
         " ",
         React.createElement("button", { onClick: () => set({ seed: 42 }) }, "Reset")
       )
     ),
 
-    React.createElement(Card, { title: "Current Settings" },
-      React.createElement("div", { className:"muted", style:{marginBottom:8} }, "These values come from config files and in‑page state."),
-      React.createElement("div", null, "Mode: ", React.createElement("strong", null, snap.mode)),
-      React.createElement("div", null, "Available KPIs: ", kpiList.join(", ") || "—")
+    React.createElement(Card, { title: "Ideal Persona Radar" },
+      React.createElement(RadarCanvas, { render: renderIdeal })
     ),
 
-    React.createElement(Card, { title: "Ideal Persona Radar" },
-      React.createElement(IdealPersonaRadar, { mode: snap.mode, seed: snap.seed })
+    React.createElement(Card, { title: `Influence Radar — ${snap.selectedKpi}` },
+      React.createElement("div", { className:"muted", style:{marginBottom:8} }, "Which skills correlate most with the selected KPI (0–5 scaled)."),
+      React.createElement(RadarCanvas, { render: renderInfluence })
+    ),
+
+    React.createElement(Card, { title: "Performance Radar — Actual vs Target" },
+      React.createElement(RadarCanvas, { render: renderPerformance }),
+      React.createElement("div", { className:"muted", style:{marginTop:8} },
+        "Top gaps: ",
+        gaps.slice(0,3).map(g => `${g.label} (+${g.gap})`).join(", ")
+      )
+    ),
+
+    React.createElement(Card, { title: "Recommendations" },
+      React.createElement("ul", null,
+        recos.map(r =>
+          React.createElement("li", { key:r.id },
+            React.createElement("strong", null, r.label), " — ",
+            r.title, " | Gap: ", r.gap,
+            " | Influence: ", r.influence,
+            " | Expected KPI lift: +", r.expectedKpiLift
+          )
+        )
+      ),
+      React.createElement("div", { className:"muted" }, "Demo math for lift; real mode will use live cohort estimates.")
     )
   );
 }
