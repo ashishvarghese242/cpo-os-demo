@@ -6,17 +6,18 @@ async function json(path){ const r = await fetch(path, { cache:"no-store" }); if
 
 async function bootstrap() {
   try {
-    const [modes, kpis, skillsSales, skillsCS, skillsProd, data] = await Promise.all([
+    const [modes, kpis, skillsSales, skillsCS, skillsProd, data, catalog] = await Promise.all([
       json("./config/modes.json"),
       json("./config/kpis.json"),
       json("./config/skills.sales.json"),
       json("./config/skills.cs.json"),
       json("./config/skills.prod.json"),
-      loadAllData()
+      loadAllData(),
+      json("./data/content_catalog.json")
     ]);
 
     window.__CONFIG = { modes, kpis, skills: { sales: skillsSales, cs: skillsCS, prod: skillsProd } };
-    window.__DATA = data;
+    window.__DATA = { ...data, content_catalog: catalog };
 
     const rootEl = document.getElementById("root");
     const { React, ReactDOM } = window;
