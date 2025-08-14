@@ -6,10 +6,11 @@ import {
   cohortPersonIds, performanceGaps,
   primaryKpiLabel, kpiForCohort, kpiForPerson
 } from "../lib/compute.js";
-import { renderRadar, dsActual, dsTarget, dsInfluence } from "../lib/charts.js";
+import { renderRadar, dsActual, dsTarget, dsInfluence, dsTraining } from "../lib/charts.js";
 import { influenceScores } from "../lib/influence.js";
 import { rankRecommendations } from "../lib/reco.js";
 import { computeROI } from "../lib/roi.js";
+import { leverageForCohort, topContentDrivers, recommendContentForGaps } from "../lib/lrs.js";
 
 const React = window.React;
 
@@ -32,7 +33,6 @@ function RadarCanvas({ height=360, render }) {
   useEffect(() => { if (ref.current) render(ref.current); }, [render]);
   return React.createElement("div", { style:{height} }, React.createElement("canvas", { ref }));
 }
-
 function Table({ columns, rows }) {
   const thead = React.createElement("thead", null,
     React.createElement("tr", null, columns.map(c => React.createElement("th", { key:c }, c)))
@@ -40,9 +40,7 @@ function Table({ columns, rows }) {
   const tbody = React.createElement("tbody", null,
     rows.map((r,i) => React.createElement("tr",{key:i}, columns.map(c => React.createElement("td",{key:c}, r[c]))))
   );
-  return React.createElement("table", { style:{
-    width:"100%", borderCollapse:"separate", borderSpacing:"0", fontSize:"14px"
-  }}, thead, tbody);
+  return React.createElement("table", { style:{ width:"100%", borderCollapse:"separate", borderSpacing:"0", fontSize:"14px" }}, thead, tbody);
 }
 
 export default function App() {
@@ -57,12 +55,12 @@ export default function App() {
   const regions = Array.from(new Set(peopleInMode.map(p => p.region))).filter(Boolean).sort();
   const persons = peopleInMode.map(p => ({ id:p.person_id, name:p.name || p.person_id, region:p.region||"" }));
 
-  // default the cohort key if needed
+  // guard cohort key
   React.useEffect(() => {
-    if (snap.cohortType === "Person" && snap.cohortKey && !persons.find(p=>p.id===snap.cohortKey)) {
+    if (snap.cohortType === "Person" && (!snap.cohortKey || !persons.find(p=>p.id===snap.cohortKey))) {
       set({ cohortKey: persons[0]?.id || "" });
     }
-    if (snap.cohortType === "Region" && snap.cohortKey && !regions.includes(snap.cohortKey)) {
+    if (snap.cohortType === "Region" && (!snap.cohortKey || !regions.includes(snap.cohortKey))) {
       set({ cohortKey: regions[0] || "" });
     }
   }, [snap.mode, snap.cohortType]);
@@ -74,36 +72,48 @@ export default function App() {
 
   const cohort = sampleCohort(snap.mode, skillsCfg, 7, 120);
   const influence = influenceScores(labels, cohort);
-  const recos = rankRecommendations({ mode: snap.mode, gaps, influence, data });
 
+  // NEW: training leverage layer (0..5 per skill)
+  const leverageMap = leverageForCohort(snap.mode, personIds, data);
+  const leverageArray = ids.map(id => leverageMap[id] ?? 0);
+
+  // content
+  const contentDrivers = topContentDrivers(snap.mode, personIds, data, 5);
+  const contentRecs = recommendContentForGaps(snap.mode, gaps, personIds, data, 2);
+
+  // KPI + ROI
   const primaryKpi = primaryKpiLabel(snap.mode);
   const cohortKpiVal = kpiForCohort(snap.mode, data, personIds);
+  const recos = rankRecommendations({ mode: snap.mode, gaps, influence, data });
+  const roi = computeROI({ mode: snap.mode, recos });
+  const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
-  // chart renderers
+  // chart renderers — now include training overlay
   function renderIdeal(el){
-    const a = dsActual(), t = dsTarget();
+    const a = dsActual(), t = dsTarget(), tr = dsTraining();
     renderRadar(el, labels, [
       { label: "Ideal Persona (Target)", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
-      { label: "Current (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:2 }
+      { label: "Current (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 },
+      { label: "Training Impact (LRS)", data: leverageArray, backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 }
     ]);
   }
   function renderInfluence(el){
-    const i = dsInfluence();
+    const i = dsInfluence(), tr = dsTraining();
     renderRadar(el, labels, [
       { label: `${primaryKpi} Influence`, data: influence.map(i=>i.score0to5),
-        backgroundColor:i.fill, borderColor:i.line, borderWidth:2, pointRadius:2 }
+        backgroundColor:i.fill, borderColor:i.line, borderWidth:2, pointRadius:2, order:1 },
+      { label: "Training Impact (LRS)", data: leverageArray,
+        backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 }
     ]);
   }
   function renderPerformance(el){
-    const a = dsActual(), t = dsTarget();
+    const a = dsActual(), t = dsTarget(), tr = dsTraining();
     renderRadar(el, labels, [
       { label: "Target", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
-      { label: "Actual (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:2 }
+      { label: "Training Impact (LRS)", data: leverageArray, backgroundColor:tr.fill, borderColor:tr.line, borderWidth:2, borderDash:[6,4], pointRadius:2, order:2 },
+      { label: "Actual (Cohort Avg)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:3 }
     ]);
   }
-
-  const roi = computeROI({ mode: snap.mode, recos });
-  const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
   // Gap summary rows
   const gapRows = gaps.map(g => ({
@@ -111,7 +121,7 @@ export default function App() {
     Actual: g.actual.toFixed(1),
     Target: g.target.toFixed(1),
     Gap: `+${g.gap.toFixed(1)}`,
-    Influence: (influence.find(i => i.label===g.label)?.score0to5 ?? 0).toFixed(1)
+    Training: (leverageMap[g.id] ?? 0).toFixed(1)
   })).slice(0,5);
 
   // Drilldown rows
@@ -169,41 +179,47 @@ export default function App() {
       )
     ),
 
-    React.createElement(Card, { title: `Ideal Role Profile vs Cohort (Primary KPI: ${primaryKpi} • Cohort size: ${personIds.length})` },
+    React.createElement(Card, { title: `IRP vs Cohort (Primary KPI: ${primaryKpi} • Cohort size: ${personIds.length})` },
       React.createElement("div", { className:"muted", style:{marginBottom:8} }, `Cohort ${snap.cohortType}${snap.cohortKey?`: ${snap.cohortKey}`:""}. Current ${primaryKpi}: ${fmt(cohortKpiVal)}.`),
       React.createElement(RadarCanvas, { render: renderIdeal })
     ),
 
     React.createElement(Card, { title: `Influence Radar — ${primaryKpi}` },
-      React.createElement("div", { className:"muted", style:{marginBottom:8} }, "Which skills correlate most with the primary KPI (0–5 scaled)."),
+      React.createElement("div", { className:"muted", style:{marginBottom:8} }, "Skill → KPI strength and the LRS training impact overlay."),
       React.createElement(RadarCanvas, { render: renderInfluence })
     ),
 
-    React.createElement(Card, { title: "Performance Radar — Actual vs Target" },
+    React.createElement(Card, { title: "Performance Radar — Actual vs Target (+ Training)" },
       React.createElement(RadarCanvas, { render: renderPerformance })
     ),
 
-    React.createElement(Card, { title: "Gap Summary (Where • What • How Much)" },
-      React.createElement(Table, { columns:["Skill","Actual","Target","Gap","Influence"], rows: gapRows })
+    React.createElement(Card, { title: "Gap Summary (Where • What • How Much • Training)" },
+      React.createElement(Table, { columns:["Skill","Actual","Target","Gap","Training"], rows: gapRows })
     ),
 
-    React.createElement(Card, { title: "Recommendations (with Content Suggestions)" },
+    React.createElement(Card, { title: "Top Content Drivers (Observed)" },
       React.createElement("ul", null,
-        recos.map(r =>
-          React.createElement("li", { key:r.id },
-            React.createElement("strong", null, r.label), " — ",
-            r.title, " | Gap: ", r.gap.toFixed(1),
-            " | Influence: ", r.influence.toFixed(1),
-            " | Expected KPI lift: +", r.expectedKpiLift,
-            r.assets?.length ? ` | Content: ${r.assets.map(a=>`${a.type} (${a.asset_id})`).join(", ")}` : ""
+        contentDrivers.map(c => React.createElement("li", { key:c.content_id },
+          `${c.title} — ${c.type} • Skill: ${c.skill_id} • Used: ${c.used} • Driver: ${c.driver}`
+        ))
+      ),
+      React.createElement("div", { className:"muted" }, "Driver = cohort usage × expected skill lift (synthetic).")
+    ),
+
+    React.createElement(Card, { title: "Content Recommendations (for the selected cohort/person)" },
+      contentRecs.map(block =>
+        React.createElement("div", { key:block.skill, style:{marginBottom:8} },
+          React.createElement("strong", null, block.skill, ` (Gap +${block.gap.toFixed(1)})`),
+          React.createElement("ul", null,
+            block.items.map(it =>
+              React.createElement("li", { key: it.content_id },
+                `${it.title} — ${it.type} • Expected skill lift: ${(it.expected_skill_lift*100).toFixed(0)}%`,
+                it.used ? ` • Current usage: ${it.used}` : ""
+              )
+            )
           )
         )
-      ),
-      React.createElement("div", { className:"muted" }, "Content suggestions are derived from /data/cms.json (e.g., DSR flags, playbooks).")
-    ),
-
-    React.createElement(Card, { title: "Cohort Drilldown" },
-      React.createElement(Table, { columns: drillCols, rows: drillRows })
+      )
     ),
 
     React.createElement(Card, { title: "ROI / COI Overview" },
