@@ -1,0 +1,19 @@
+[
+  { "content_id": "disc101",  "title": "Discovery Micro‑Tour",   "type": "Course",    "mode": "Sales",      "skill_id": "discovery",  "tag": "discovery",  "expected_skill_lift": 0.30 },
+  { "content_id": "obj201",   "title": "Objection Playbook",     "type": "Playbook",  "mode": "Sales",      "skill_id": "objections", "tag": "objections", "expected_skill_lift": 0.28 },
+  { "content_id": "multi110", "title": "Multithreading 101",     "type": "Guide",     "mode": "Sales",      "skill_id": "multi",      "tag": "multi",      "expected_skill_lift": 0.22 },
+  { "content_id": "demo200",  "title": "Demo Coverage Kit",      "type": "Checklist", "mode": "Sales",      "skill_id": "demo",       "tag": "demo",       "expected_skill_lift": 0.25 },
+  { "content_id": "ns100",    "title": "Next‑Step Scripts",      "type": "Script",    "mode": "Sales",      "skill_id": "nextstep",   "tag": "nextstep",   "expected_skill_lift": 0.20 },
+
+  { "content_id": "onb101",   "title": "Onboarding Runbook",     "type": "Runbook",   "mode": "CS",         "skill_id": "onboarding", "tag": "onboarding", "expected_skill_lift": 0.30 },
+  { "content_id": "act220",   "title": "Feature Activation",     "type": "Guide",     "mode": "CS",         "skill_id": "activation", "tag": "activation", "expected_skill_lift": 0.26 },
+  { "content_id": "tri200",   "title": "Triage Macros",          "type": "Macro",     "mode": "CS",         "skill_id": "triage",     "tag": "triage",     "expected_skill_lift": 0.22 },
+  { "content_id": "qbr100",   "title": "QBR Cadence Pack",       "type": "Template",  "mode": "CS",         "skill_id": "qbr",        "tag": "qbr",        "expected_skill_lift": 0.18 },
+  { "content_id": "ren300",   "title": "Renewal Forecast Kit",   "type": "Guide",     "mode": "CS",         "skill_id": "renewal",    "tag": "renewal",    "expected_skill_lift": 0.24 },
+
+  { "content_id": "flow90",   "title": "Smaller PRs Policy",     "type": "Policy",    "mode": "Production", "skill_id": "flow",       "tag": "flow",       "expected_skill_lift": 0.22 },
+  { "content_id": "revSLA",   "title": "Review‑SLA Bot",         "type": "Bot",       "mode": "Production", "skill_id": "review",     "tag": "review",     "expected_skill_lift": 0.27 },
+  { "content_id": "rel100",   "title": "Pre‑merge Checklist",    "type": "Checklist", "mode": "Production", "skill_id": "reliable",   "tag": "reliable",   "expected_skill_lift": 0.20 },
+  { "content_id": "rec200",   "title": "Incident Drill",         "type": "Runbook",   "mode": "Production", "skill_id": "recovery",   "tag": "recovery",   "expected_skill_lift": 0.30 },
+  { "content_id": "eff50",    "title": "WIP Limits Coaching",    "type": "Guide",     "mode": "Production", "skill_id": "eff",        "tag": "eff",        "expected_skill_lift": 0.18 }
+]
