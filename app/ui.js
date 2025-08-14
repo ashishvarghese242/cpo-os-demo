@@ -45,13 +45,14 @@ export default function App() {
   const recos = rankRecommendations({ mode: snap.mode, gaps, influence });
 
   // chart renderers with theme colors
-  function renderIdeal(el){
-    const a = dsActual(), t = dsTarget();
-    renderRadar(el, labels, [
-      { label: "Ideal Persona (Target)", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2 },
-      { label: "Current (Demo)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2 }
-    ]);
-  }
+ function renderIdeal(el){
+  const a = dsActual(), t = dsTarget();
+  renderRadar(el, labels, [
+    { label: "Ideal Persona (Target)", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1 },
+    { label: "Current (Demo)", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:2 }
+  ]);
+}
+
   function renderInfluence(el){
     const i = dsInfluence();
     renderRadar(el, labels, [
@@ -62,8 +63,8 @@ export default function App() {
   function renderPerformance(el){
     const a = dsActual(), t = dsTarget();
     renderRadar(el, labels, [
-      { label: "Target", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2 },
-      { label: "Actual", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2 }
+      { label: "Target", data: targets, backgroundColor:t.fill, borderColor:t.line, borderWidth:2, pointRadius:2, order:1  },
+      { label: "Actual", data: currentSkills, backgroundColor:a.fill, borderColor:a.line, borderWidth:2, pointRadius:2, order:2  }
     ]);
   }
 
