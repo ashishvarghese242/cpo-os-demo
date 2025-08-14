@@ -27,7 +27,7 @@ function Card({ title, children }) {
     children
   );
 }
-function RadarCanvas({ height=360, render }) {
+function RadarCanvas({ height=320, render }) {
   const { useEffect, useRef } = React;
   const ref = useRef(null);
   useEffect(() => { if (ref.current) render(ref.current); }, [render]);
@@ -81,15 +81,15 @@ export default function App() {
   const contentDrivers = topContentDrivers(snap.mode, personIds, data, 5);
   const contentRecs = recommendContentForGaps(snap.mode, gaps, personIds, data, 2);
 
-  // KPI + ROI
+  // KPI + ROI (now at top as banner)
   const primaryKpi = primaryKpiLabel(snap.mode);
   const cohortKpiVal = kpiForCohort(snap.mode, data, personIds);
   const recos = rankRecommendations({ mode: snap.mode, gaps, influence, data });
   const roi = computeROI({ mode: snap.mode, recos });
   const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
-  // chart renderers — include training overlay with strong contrast & dashed line
-  function renderIdeal(el){
+  // chart renderers — include training overlay
+  function renderIRP(el){
     const a = dsActual(), t = dsTarget(), tr = dsTraining();
     renderRadar(el, labels, [
       { label: "Ideal Persona (Target)", data: targets,
@@ -143,11 +143,13 @@ export default function App() {
 
   return React.createElement("div", { className:"wrap" },
 
+    /* ===== Hero ===== */
     React.createElement("div", { className:"hero" },
       React.createElement("h1", null, "Transform Enablement from Cost Center to Growth Engine"),
       React.createElement("p", null, "Zero‑custody • KPI‑first • Built for C‑levels")
     ),
 
+    /* ===== Controls ===== */
     React.createElement("header", null,
       React.createElement("div", { className:"brand" },
         React.createElement("span", { className:"badge" }, "CPO OS"),
@@ -166,18 +168,25 @@ export default function App() {
           value: snap.cohortType,
           onChange: e => set({ cohortType: e.target.value, cohortKey: "" })
         }, ["All","Region","Person"].map(c => React.createElement("option",{key:c,value:c},c))),
-        snap.cohortType==="Region" && regions.length ? React.createElement(React.Fragment, null, " ",
-          React.createElement("select", {
-            value: snap.cohortKey || regions[0],
-            onChange: e => set({ cohortKey: e.target.value })
-          }, regions.map(r => React.createElement("option",{key:r,value:r},r)))
-        ) : null,
-        snap.cohortType==="Person" && persons.length ? React.createElement(React.Fragment, null, " ",
-          React.createElement("select", {
-            value: snap.cohortKey || persons[0]?.id || "",
-            onChange: e => set({ cohortKey: e.target.value })
-          }, persons.map(p => React.createElement("option",{key:p.id,value:p.id},p.name)))
-        ) : null,
+        (() => {
+          if (snap.cohortType==="Region" && regions.length) {
+            return React.createElement(React.Fragment, null, " ",
+              React.createElement("select", {
+                value: snap.cohortKey || regions[0],
+                onChange: e => set({ cohortKey: e.target.value })
+              }, regions.map(r => React.createElement("option",{key:r,value:r},r)))
+            );
+          }
+          if (snap.cohortType==="Person" && persons.length) {
+            return React.createElement(React.Fragment, null, " ",
+              React.createElement("select", {
+                value: snap.cohortKey || persons[0]?.id || "",
+                onChange: e => set({ cohortKey: e.target.value })
+              }, persons.map(p => React.createElement("option",{key:p.id,value:p.id},p.name)))
+            );
+          }
+          return null;
+        })(),
         " ",
         React.createElement("button", { onClick: () => set({ seed: (snap.seed + 1) % 1000000 }) }, "Regenerate"),
         " ",
@@ -185,68 +194,89 @@ export default function App() {
       )
     ),
 
-    React.createElement(Card, { title: `IRP vs Cohort (Primary KPI: ${primaryKpi} • Cohort size: ${personIds.length})` },
-      React.createElement("div", { className:"muted", style:{marginBottom:8} }, `Cohort ${snap.cohortType}${snap.cohortKey?`: ${snap.cohortKey}`:""}. Current ${primaryKpi}: ${fmt(cohortKpiVal)}.`),
-      React.createElement(RadarCanvas, { render: renderIdeal })
+    /* ===== ROI/COI Banner ===== */
+    React.createElement("div", { className:"roi-banner" },
+      React.createElement("div", { className:"roi-row" },
+        React.createElement("div", { className:"kpi negative" },
+          React.createElement("h4", null, "Status‑Quo Cost (Annual COI)"),
+          React.createElement("div", { className:"big" }, "$", fmt(roi.coiAnnual)),
+          React.createElement("div", { className:"sub" }, "Training waste and delay cost of doing nothing.")
+        ),
+        React.createElement("div", { className:"kpi positive" },
+          React.createElement("h4", null, "Projected Annual Upside"),
+          React.createElement("div", { className:"big" }, "$", fmt(roi.upsideAnnual)),
+          React.createElement("div", { className:"sub" }, "Revenue gain or efficiency savings from prioritized actions.")
+        ),
+        React.createElement("div", { className:"kpi neutral" },
+          React.createElement("h4", null, "Net Value • Year 1"),
+          React.createElement("div", { className:"big" }, "$", fmt(roi.netAnnual)),
+          React.createElement("div", { className:"sub" }, "After subtracting status‑quo cost. Conservative demo math.")
+        ),
+        React.createElement("div", { className:"kpi neutral" },
+          React.createElement("h4", null, "Program Cost • Payback • ROI"),
+          React.createElement("div", { className:"big" }, "$", fmt(roi.programCost), " • ", roi.paybackMonths, " mo • ", roi.roiPercent, "%"),
+          React.createElement("div", { className:"sub" }, "Direct enablement investment and payback horizon.")
+        )
+      )
     ),
 
-    React.createElement(Card, { title: `Influence Radar — ${primaryKpi}` },
-      React.createElement("div", { className:"muted", style:{marginBottom:8} }, "Skill → KPI strength and the LRS training impact overlay."),
-      React.createElement(RadarCanvas, { render: renderInfluence })
+    /* ===== Three radars, side by side ===== */
+    React.createElement("div", { className:"grid-3" },
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, `IRP vs Cohort (${primaryKpi} • Size: ${personIds.length})`),
+        React.createElement("div", { className:"muted", style:{marginBottom:8} }, `Cohort ${snap.cohortType}${snap.cohortKey?`: ${snap.cohortKey}`:""}. Current ${primaryKpi}: ${fmt(cohortKpiVal)}.`),
+        React.createElement(RadarCanvas, { render: renderIRP })
+      ),
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, `Influence Radar — ${primaryKpi}`),
+        React.createElement("div", { className:"muted", style:{marginBottom:8} }, "Skill → KPI strength with training overlay."),
+        React.createElement(RadarCanvas, { render: renderInfluence })
+      ),
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, "Performance — Actual vs Target (+ Training)"),
+        React.createElement(RadarCanvas, { render: renderPerformance })
+      )
     ),
 
-    React.createElement(Card, { title: "Performance Radar — Actual vs Target (+ Training)" },
-      React.createElement(RadarCanvas, { render: renderPerformance })
-    ),
-
-    React.createElement(Card, { title: "Gap Summary (Where • What • How Much • Training)" },
-      React.createElement(Table, { columns:["Skill","Actual","Target","Gap","Training"], rows: gapRows })
-    ),
-
-    React.createElement(Card, { title: "Recommended Content (KPI‑linked training for this cohort/person)" },
-      contentRecs.length
-        ? contentRecs.map(block =>
-            React.createElement("div", { key:block.skill, style:{marginBottom:8} },
-              React.createElement("strong", null, block.skill, ` (Gap +${block.gap.toFixed(1)})`),
-              React.createElement("ul", null,
-                block.items.map(it =>
-                  React.createElement("li", { key: it.content_id },
-                    `${it.title} — ${it.type} • Expected skill lift: ${(it.expected_skill_lift*100).toFixed(0)}%`,
-                    it.used ? ` • Current usage: ${it.used}` : ""
+    /* ===== Gaps & Content ===== */
+    React.createElement("div", { className:"grid-3", style:{marginTop:16} },
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, "Gap Summary"),
+        React.createElement(Table, { columns:["Skill","Actual","Target","Gap","Training"], rows: gapRows })
+      ),
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, "Recommended Content (for this cohort/person)"),
+        contentRecs.length
+          ? contentRecs.map(block =>
+              React.createElement("div", { key:block.skill, style:{marginBottom:8} },
+                React.createElement("strong", null, block.skill, ` (Gap +${block.gap.toFixed(1)})`),
+                React.createElement("ul", null,
+                  block.items.map(it =>
+                    React.createElement("li", { key: it.content_id },
+                      `${it.title} — ${it.type} • Expected skill lift: ${(it.expected_skill_lift*100).toFixed(0)}%`,
+                      it.used ? ` • Current usage: ${it.used}` : ""
+                    )
                   )
                 )
               )
             )
-          )
-        : React.createElement("div", { className:"muted" }, "No catalog items found for this mode.")
-    ),
-
-    React.createElement(Card, { title: "Top Content Drivers (Observed from LRS)" },
-      React.createElement("ul", null,
-        contentDrivers.map(c => React.createElement("li", { key:c.content_id },
-          `${c.title} — ${c.type} • Skill: ${c.skill_id} • Used: ${c.used} • Driver: ${c.driver}`
-        ))
+          : React.createElement("div", { className:"muted" }, "No catalog items found for this mode.")
       ),
-      React.createElement("div", { className:"muted" }, "Driver = cohort usage × expected skill lift (synthetic).")
-    ),
-
-    React.createElement(Card, { title: "Cohort Drilldown" },
-      React.createElement(Table, { columns: ["Person","KPI"].concat(labels), rows: personIds.slice(0,50).map(pid => {
-        const p = persons.find(x=>x.id===pid);
-        const s = skillScoresForPerson(snap.mode, skillsCfg, pid, data);
-        const k = kpiForPerson(snap.mode, data, pid);
-        const row = { Person: p?.name || pid, KPI: k };
-        labels.forEach((lab, i) => row[lab] = s[i].toFixed(1));
-        return row;
-      }) })
-    ),
-
-    React.createElement(Card, { title: "ROI / COI Overview" },
-      React.createElement("div", null,
-        React.createElement("div", null, "Total KPI Lift (sum of recos): ", (recos.reduce((s,r)=>s+r.expectedKpiLift,0)).toFixed(2)),
-        React.createElement("div", null, "Revenue Impact / Savings: $", fmt((computeROI({ mode: snap.mode, recos }).netImpact))),
-        React.createElement("div", { className:"muted" }, "Adjust assumptions in /lib/roi.js.")
+      React.createElement("div", { className:"card" },
+        React.createElement("h3", null, "Top Content Drivers (Observed from LRS)"),
+        React.createElement("ul", null,
+          contentDrivers.map(c => React.createElement("li", { key:c.content_id },
+            `${c.title} — ${c.type} • Skill: ${c.skill_id} • Used: ${c.used} • Driver: ${c.driver}`
+          ))
+        ),
+        React.createElement("div", { className:"muted" }, "Driver = cohort usage × expected skill lift (synthetic).")
       )
+    ),
+
+    /* ===== Drilldown ===== */
+    React.createElement("div", { className:"card", style:{marginTop:16} },
+      React.createElement("h3", null, "Cohort Drilldown"),
+      React.createElement(Table, { columns: drillCols, rows: drillRows })
     )
   );
 }
