@@ -66,6 +66,8 @@ export default function App() {
   }, [snap.mode, snap.cohortType]);
 
   const personIds = cohortPersonIds(snap.mode, data, snap.cohortType, snap.cohortKey);
+  const teamSize = snap.cohortType === "Person" ? 1 : personIds.length;
+
   const { labels, targets, ids } = idealPersona(snap.mode, skillsCfg);
   const currentSkills = skillScoresForCohort(snap.mode, skillsCfg, data, personIds);
   const gaps = performanceGaps(currentSkills, targets, ids, labels);
@@ -81,11 +83,14 @@ export default function App() {
   const contentDrivers = topContentDrivers(snap.mode, personIds, data, 5);
   const contentRecs = recommendContentForGaps(snap.mode, gaps, personIds, data, 2);
 
-  // KPI + ROI (now at top as banner)
+  // KPI + ROI — now cohort-aware
   const primaryKpi = primaryKpiLabel(snap.mode);
   const cohortKpiVal = kpiForCohort(snap.mode, data, personIds);
   const recos = rankRecommendations({ mode: snap.mode, gaps, influence, data });
-  const roi = computeROI({ mode: snap.mode, recos });
+
+  // pass teamSize so COI/ROI reflect current selection
+  const roi = computeROI({ mode: snap.mode, recos, teamSize });
+
   const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
   // chart renderers — include training overlay
@@ -194,13 +199,13 @@ export default function App() {
       )
     ),
 
-    /* ===== ROI/COI Banner ===== */
+    /* ===== ROI/COI Banner — cohort-aware ===== */
     React.createElement("div", { className:"roi-banner" },
       React.createElement("div", { className:"roi-row" },
         React.createElement("div", { className:"kpi negative" },
-          React.createElement("h4", null, "Status‑Quo Cost (Annual COI)"),
+          React.createElement("h4", null, `Status‑Quo Cost (Annual COI) • Cohort: ${teamSize}`),
           React.createElement("div", { className:"big" }, "$", fmt(roi.coiAnnual)),
-          React.createElement("div", { className:"sub" }, "Training waste and delay cost of doing nothing.")
+          React.createElement("div", { className:"sub" }, "Training waste and delay cost of doing nothing, for this selection.")
         ),
         React.createElement("div", { className:"kpi positive" },
           React.createElement("h4", null, "Projected Annual Upside"),
@@ -223,7 +228,7 @@ export default function App() {
     /* ===== Three radars, side by side ===== */
     React.createElement("div", { className:"grid-3" },
       React.createElement("div", { className:"card" },
-        React.createElement("h3", null, `IRP vs Cohort (${primaryKpi} • Size: ${personIds.length})`),
+        React.createElement("h3", null, `IRP vs Cohort (${primaryKpi} • Size: ${teamSize})`),
         React.createElement("div", { className:"muted", style:{marginBottom:8} }, `Cohort ${snap.cohortType}${snap.cohortKey?`: ${snap.cohortKey}`:""}. Current ${primaryKpi}: ${fmt(cohortKpiVal)}.`),
         React.createElement(RadarCanvas, { render: renderIRP })
       ),
