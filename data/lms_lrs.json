@@ -1,0 +1,5 @@
+[
+  { "person_id":"p1","course_id":"disc101","verb":"completed","timestamp":"2024-12-01","score":92,"duration_min":45,"content_tag":"discovery","is_required":true },
+  { "person_id":"p1","course_id":"obj201","verb":"completed","timestamp":"2025-01-10","score":78,"duration_min":30,"content_tag":"objections","is_required":false },
+  { "person_id":"c1","course_id":"onb101","verb":"completed","timestamp":"2025-01-05","score":88,"duration_min":40,"content_tag":"onboarding","is_required":true }
+]
