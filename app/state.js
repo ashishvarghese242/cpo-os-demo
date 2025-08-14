@@ -29,4 +29,3 @@ export const selectMode = () => _state.mode;
 export const selectCohort = () => _state.cohort;
 export const selectKpi = () => _state.selectedKpi;
 export const selectSeed = () => _state.seed;
-
