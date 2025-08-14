@@ -4,10 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CPO OS Demo</title>
+  <meta name="description" content="Zero-custody, KPI-first enablement simulator." />
+  <style>
+    :root { --bg:#f7f7fb; --card:#ffffff; --text:#111827; --sub:#6b7280; --line:#e5e7eb; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width: 1120px; margin: 24px auto; padding: 0 16px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; }
+    header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .muted { color:var(--sub); font-size:12px; }
+    button, select { border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff; }
+  </style>
+
+  <!-- React & ReactDOM (UMD globals: window.React, window.ReactDOM) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+  <!-- Chart.js (UMD global: window.Chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div id="root" style="font-family:system-ui, -apple-system, Segoe UI, Roboto; padding:24px;">
-    ✅ CPO OS Demo scaffold is live. Next we’ll add modules.
+  <div id="root">
+    <div class="wrap">
+      <div class="card">
+        Bootstrapping CPO OS Demo… if this message stays, the JS didn’t load.
+      </div>
+    </div>
   </div>
+
+  <!-- App entry (ES module) -->
+  <script type="module" src="./app/main.js"></script>
 </body>
 </html>
