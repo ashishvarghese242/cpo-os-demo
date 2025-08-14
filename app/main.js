@@ -1,47 +1,29 @@
 // app/main.js
 import App from "./ui.js";
+import { loadAllData } from "../lib/dataLoader.js";
 
-async function loadJson(path) {
-  const res = await fetch(path, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`);
-  return res.json();
-}
+async function json(path){ const r = await fetch(path, { cache:"no-store" }); if(!r.ok) throw new Error(`${path} ${r.status}`); return r.json(); }
 
 async function bootstrap() {
   try {
-    console.log("[CPO] main.js loaded");
-    const [modes, kpis, skillsSales, skillsCS, skillsProd] = await Promise.all([
-      loadJson("./config/modes.json"),
-      loadJson("./config/kpis.json"),
-      loadJson("./config/skills.sales.json"),
-      loadJson("./config/skills.cs.json"),
-      loadJson("./config/skills.prod.json"),
+    const [modes, kpis, skillsSales, skillsCS, skillsProd, data] = await Promise.all([
+      json("./config/modes.json"),
+      json("./config/kpis.json"),
+      json("./config/skills.sales.json"),
+      json("./config/skills.cs.json"),
+      json("./config/skills.prod.json"),
+      loadAllData()
     ]);
 
-    window.__CONFIG = {
-      modes,
-      kpis,
-      skills: { sales: skillsSales, cs: skillsCS, prod: skillsProd }
-    };
+    window.__CONFIG = { modes, kpis, skills: { sales: skillsSales, cs: skillsCS, prod: skillsProd } };
+    window.__DATA = data;
 
     const rootEl = document.getElementById("root");
-    const React = window.React;
-    const ReactDOM = window.ReactDOM;
-
-    if (!React || !ReactDOM) throw new Error("React/ReactDOM not available");
+    const { React, ReactDOM } = window;
     ReactDOM.createRoot(rootEl).render(React.createElement(App));
-  } catch (err) {
-    const rootEl = document.getElementById("root");
-    rootEl.innerHTML = `
-      <div class="wrap">
-        <div class="card">
-          <h3>Could not start the demo</h3>
-          <div class="muted">${(err && err.message) || err}</div>
-          <div class="muted">Check that all /config/*.json files exist.</div>
-        </div>
-      </div>`;
-    console.error("[CPO] bootstrap error:", err);
+  } catch (e) {
+    document.getElementById("root").innerHTML = `<div class="wrap"><div class="card"><h3>Startup error</h3><div class="muted">${e.message}</div></div></div>`;
+    console.error(e);
   }
 }
-
 bootstrap();
