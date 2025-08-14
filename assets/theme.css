@@ -1,0 +1,61 @@
+/* assets/theme.css  — CPO site-inspired theme */
+:root{
+  /* Base */
+  --bg: #e9f0f7;             /* light bluish background (matches site sections) */
+  --card: #ffffff;
+  --text: #0f172a;           /* slate-900 */
+  --muted: #6b7280;          /* slate-500/600 */
+  --line: #e5e7eb;
+
+  /* Brand accents (inspired by hero gradient & AI chip imagery) */
+  --accent: #6a00ff;         /* electric purple */
+  --accent-2: #00d1ff;       /* cyan */
+  --accent-warm: #ffd166;    /* warm highlight from site imagery */
+
+  /* Chart colors */
+  --chart-actual-fill: rgba(15, 23, 42, 0.20);
+  --chart-actual-line: rgba(15, 23, 42, 1);
+  --chart-target-fill: rgba(106, 0, 255, 0.15);
+  --chart-target-line: rgba(106, 0, 255, 1);
+  --chart-influence-fill: rgba(0, 209, 255, 0.18);
+  --chart-influence-line: rgba(0, 209, 255, 1);
+
+  /* UI polish */
+  --radius: 16px;
+  --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+}
+
+*{ box-sizing: border-box; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.wrap{ max-width: 1120px; margin: 24px auto; padding: 0 16px; }
+.card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+header{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;
+}
+.brand h2{ margin:0 }
+.brand .tag{ color: var(--muted); font-size:12px }
+
+select, button{
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #fff;
+}
+
+.badge{
+  display:inline-flex; gap:8px; align-items:center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#fff; font-weight:700; padding:8px 12px; border-radius: 999px;
+}
