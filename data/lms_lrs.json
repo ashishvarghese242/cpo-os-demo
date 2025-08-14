@@ -1,7 +1,5 @@
 [
-  /* =========================
-     SALES — content_tag ∈ {discovery, objections, multi, demo, nextstep}
-     ========================= */
+
   { "person_id":"s001","verb":"completed","content_tag":"discovery","score":92,"timestamp":"2025-07-08T10:12:00Z" },
   { "person_id":"s001","verb":"completed","content_tag":"demo","score":88,"timestamp":"2025-07-12T14:35:00Z" },
   { "person_id":"s002","verb":"completed","content_tag":"objections","score":90,"timestamp":"2025-07-11T09:10:00Z" },
@@ -43,9 +41,7 @@
   { "person_id":"s020","verb":"completed","content_tag":"discovery","score":72,"timestamp":"2025-07-02T08:19:00Z" },
   { "person_id":"s020","verb":"completed","content_tag":"nextstep","score":74,"timestamp":"2025-07-19T10:55:00Z" },
 
-  /* =========================
-     CUSTOMER SUCCESS — content_tag ∈ {onboarding, activation, triage, qbr, renewal}
-     ========================= */
+
   { "person_id":"c001","verb":"completed","content_tag":"onboarding","score":91,"timestamp":"2025-07-03T09:05:00Z" },
   { "person_id":"c001","verb":"completed","content_tag":"activation","score":88,"timestamp":"2025-07-20T13:12:00Z" },
   { "person_id":"c002","verb":"completed","content_tag":"triage","score":82,"timestamp":"2025-07-06T15:30:00Z" },
@@ -87,9 +83,7 @@
   { "person_id":"c020","verb":"completed","content_tag":"qbr","score":83,"timestamp":"2025-07-07T13:18:00Z" },
   { "person_id":"c020","verb":"viewed","content_tag":"renewal","timestamp":"2025-07-25T11:27:00Z" },
 
-  /* =========================
-     PRODUCTION / ENGINEERING — content_tag ∈ {flow, review, reliable, recovery, eff}
-     ========================= */
+
   { "person_id":"p001","verb":"completed","content_tag":"review","score":94,"timestamp":"2025-07-01T10:00:00Z" },
   { "person_id":"p001","verb":"completed","content_tag":"flow","score":90,"timestamp":"2025-07-19T15:42:00Z" },
   { "person_id":"p002","verb":"completed","content_tag":"eff","score":88,"timestamp":"2025-07-04T11:21:00Z" },
