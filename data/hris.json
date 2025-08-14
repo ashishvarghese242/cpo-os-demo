@@ -1,5 +1,5 @@
 [
-  /* ===== Sales (20) ===== */
+
   { "person_id":"s001","name":"Ava Chen","org_unit":"Sales","region":"NA","role":"AE","level":"IC3","manager_id":"sm01","tenure_months":18,"email":"ava.chen@company.com" },
   { "person_id":"s002","name":"Liam Patel","org_unit":"Sales","region":"NA","role":"AE","level":"IC3","manager_id":"sm01","tenure_months":26,"email":"liam.patel@company.com" },
   { "person_id":"s003","name":"Noah Kim","org_unit":"Sales","region":"NA","role":"SDR","level":"IC2","manager_id":"sm02","tenure_months":10,"email":"noah.kim@company.com" },
@@ -21,7 +21,7 @@
   { "person_id":"s019","name":"Mei Chen","org_unit":"Sales","region":"APAC","role":"AE","level":"IC3","manager_id":"sm07","tenure_months":28,"email":"mei.chen@company.com" },
   { "person_id":"s020","name":"Zara Khan","org_unit":"Sales","region":"APAC","role":"AE","level":"IC2","manager_id":"sm07","tenure_months":5,"email":"zara.khan@company.com" },
 
-  /* ===== Customer Success (20) ===== */
+
   { "person_id":"c001","name":"Evelyn Brooks","org_unit":"CS","region":"NA","role":"CSM","level":"IC3","manager_id":"cm01","tenure_months":18,"email":"evelyn.brooks@company.com" },
   { "person_id":"c002","name":"Wyatt Green","org_unit":"CS","region":"NA","role":"CSM","level":"IC2","manager_id":"cm01","tenure_months":9,"email":"wyatt.green@company.com" },
   { "person_id":"c003","name":"Abigail Price","org_unit":"CS","region":"NA","role":"Support Eng","level":"IC3","manager_id":"cm02","tenure_months":26,"email":"abigail.price@company.com" },
@@ -43,7 +43,7 @@
   { "person_id":"c019","name":"Minh Pham","org_unit":"CS","region":"APAC","role":"Support Eng","level":"IC3","manager_id":"cm08","tenure_months":18,"email":"minh.pham@company.com" },
   { "person_id":"c020","name":"Priya Nair","org_unit":"CS","region":"APAC","role":"CSM","level":"IC3","manager_id":"cm07","tenure_months":25,"email":"priya.nair@company.com" },
 
-  /* ===== Production / Engineering (20) ===== */
+
   { "person_id":"p001","name":"Alex Johnson","org_unit":"Production","region":"NA","role":"SRE","level":"IC4","manager_id":"pm01","tenure_months":48,"email":"alex.johnson@company.com" },
   { "person_id":"p002","name":"Grace Miller","org_unit":"Production","region":"NA","role":"DevOps Eng","level":"IC3","manager_id":"pm01","tenure_months":22,"email":"grace.miller@company.com" },
   { "person_id":"p003","name":"Daniel Wright","org_unit":"Production","region":"NA","role":"Backend Eng","level":"IC3","manager_id":"pm02","tenure_months":16,"email":"daniel.wright@company.com" },
