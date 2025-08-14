@@ -1,0 +1,7 @@
+[
+  { "id": "flow",     "label": "Delivery Flow",        "target": 5.0 },
+  { "id": "review",   "label": "Code Review",          "target": 5.0 },
+  { "id": "reliable", "label": "Release Reliability",  "target": 5.0 },
+  { "id": "recovery", "label": "Recovery Discipline",  "target": 5.0 },
+  { "id": "eff",      "label": "Flow Efficiency",      "target": 5.0 }
+]
