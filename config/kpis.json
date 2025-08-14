@@ -1,0 +1,1 @@
+{ "Sales":["WinRate","ACV","Velocity"], "CS":["NRR","TTFV","TTR","RenewalRate"], "Production":["DeployFreq","LeadTime","ChangeFailure","MTTR"] }
