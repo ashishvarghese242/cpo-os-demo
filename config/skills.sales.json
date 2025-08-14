@@ -1,7 +1,7 @@
 [
-  { "id": "discovery",  "label": "Discovery Depth",        "target": 5.0 },
-  { "id": "objections", "label": "Objection Handling",     "target": 5.0 },
-  { "id": "multi",      "label": "Multithreading",         "target": 5.0 },
-  { "id": "demo",       "label": "Demo Coverage",          "target": 5.0 },
-  { "id": "nextstep",   "label": "Next‑Step Clarity",      "target": 5.0 }
+  { "id": "discovery",  "label": "Discovery Depth",        "target": 4.6 },
+  { "id": "objections", "label": "Objection Handling",     "target": 4.2 },
+  { "id": "multi",      "label": "Multithreading",         "target": 4.4 },
+  { "id": "demo",       "label": "Demo Coverage",          "target": 4.5 },
+  { "id": "nextstep",   "label": "Next‑Step Clarity",      "target": 4.3 }
 ]
