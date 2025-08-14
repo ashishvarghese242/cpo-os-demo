@@ -4,6 +4,7 @@ import { idealPersona, seededScores, sampleCohort, skillScores, performanceGaps 
 import { renderRadar } from "../lib/charts.js";
 import { influenceScores } from "../lib/influence.js";
 import { rankRecommendations } from "../lib/reco.js";
+import { computeROI } from "../lib/roi.js";
 
 const React = window.React;
 
@@ -69,12 +70,12 @@ export default function App() {
   }
 
   const kpiOptions = kpisByMode[snap.mode] || [];
-  const ensureKpi = () => {
-    if (!kpiOptions.includes(snap.selectedKpi)) {
-      set({ selectedKpi: kpiOptions[0] || "" });
-    }
-  };
-  ensureKpi();
+  if (!kpiOptions.includes(snap.selectedKpi)) {
+    set({ selectedKpi: kpiOptions[0] || "" });
+  }
+
+  const roi = computeROI({ mode: snap.mode, recos });
+  const fmt = n => (typeof n === "number" ? n.toLocaleString() : n);
 
   return React.createElement("div", { className:"wrap" },
     React.createElement("header", null,
@@ -127,7 +128,19 @@ export default function App() {
           )
         )
       ),
-      React.createElement("div", { className:"muted" }, "Demo math for lift; real mode will use live cohort estimates.")
+      React.createElement("div", { className:"muted" }, "Demo math for lift; live product uses cohort‑based estimators.")
+    ),
+
+    React.createElement(Card, { title: "ROI / COI Overview" },
+      React.createElement("div", null,
+        React.createElement("div", null, "Total KPI Lift (sum of recos): ", roi.totalKpiLift.toFixed(2)),
+        roi.revenueImpact ? React.createElement("div", null, "Revenue Impact: $", fmt(roi.revenueImpact)) : null,
+        roi.costSavings ? React.createElement("div", null, "Cost Savings: $", fmt(roi.costSavings)) : null,
+        React.createElement("div", null, "Loss of Productivity (COI): -$", fmt(roi.coiLoss)),
+        React.createElement("hr", null),
+        React.createElement("strong", null, "Net Impact: $", fmt(roi.netImpact))
+      ),
+      React.createElement("div", { className:"muted" }, "Adjust assumptions in /lib/roi.js for your audience.")
     )
   );
 }
