@@ -4,7 +4,6 @@ import RadarCard from "../../components/RadarCard.js";
 const React = window.React;
 const ReactDOM = window.ReactDOM;
 
-/* ---------- helpers ---------- */
 async function json(path){
   const r = await fetch(path, { cache:"no-store" });
   if(!r.ok) throw new Error(`${path} ${r.status}`);
@@ -30,7 +29,6 @@ function avg(arr){
   return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
 }
 
-/* ---------- Page component ---------- */
 function SalesPage({ cfg, hris, crm }) {
   const { useMemo, useState } = React;
 
@@ -56,9 +54,9 @@ function SalesPage({ cfg, hris, crm }) {
     });
   }, [cfg, crm, JSON.stringify(personIds)]);
 
-  // layout 3 + 2
-  const top3 = cards.slice(0,3);
-  const bottom2 = cards.slice(3,5);
+  const row1 = cards.slice(0,2);
+  const row2 = cards.slice(2,4);
+  const row3 = cards.slice(4,5);
 
   return React.createElement(React.Fragment, null,
     React.createElement("header", null,
@@ -84,16 +82,18 @@ function SalesPage({ cfg, hris, crm }) {
       )
     ),
 
-    React.createElement("div", { className:"grid-3", style:{marginTop:16} },
-      ...top3.map((c,i) => React.createElement(RadarCard, { key:"t"+i, ...c, height:360 }))
+    React.createElement("div", { className:"grid-2", style:{marginTop:16} },
+      ...row1.map((c,i) => React.createElement(RadarCard, { key:"r1"+i, ...c, height:360 }))
     ),
     React.createElement("div", { className:"grid-2", style:{marginTop:16} },
-      ...bottom2.map((c,i) => React.createElement(RadarCard, { key:"b"+i, ...c, height:360 }))
+      ...row2.map((c,i) => React.createElement(RadarCard, { key:"r2"+i, ...c, height:360 }))
+    ),
+    React.createElement("div", { className:"grid-1", style:{marginTop:16} },
+      ...row3.map((c,i) => React.createElement(RadarCard, { key:"r3"+i, ...c, height:360 }))
     )
   );
 }
 
-/* ---------- bootstrap ---------- */
 (async function bootstrap(){
   try{
     const [cfg, hris, crm] = await Promise.all([
