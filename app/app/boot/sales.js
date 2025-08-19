@@ -1,14 +1,16 @@
 // app/boot/sales.js
-import RadarCard from "../..//components/RadarCard.js";
+import RadarCard from "../../components/RadarCard.js";
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
 
 /* ---------- helpers ---------- */
-async function json(path){ const r = await fetch(path, { cache:"no-store" }); if(!r.ok) throw new Error(`${path} ${r.status}`); return r.json(); }
+async function json(path){
+  const r = await fetch(path, { cache:"no-store" });
+  if(!r.ok) throw new Error(`${path} ${r.status}`);
+  return r.json();
+}
 const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
-
-// normalize a raw metric to 0..5 based on floor/target and direction
 function norm(val, floor, target, higher=true){
   if (val==null || isNaN(val)) return 0;
   const a = Math.min(target, Math.max(floor, val));
@@ -16,8 +18,6 @@ function norm(val, floor, target, higher=true){
   const score = clamp(scaled * 5, 0, 5);
   return higher ? score : (5 - score);
 }
-
-// compute slice of people based on cohortType/key
 function slicePeople(hris, cohortType, cohortKey){
   const sales = hris.filter(p => p.org_unit === "Sales");
   if (cohortType === "All") return sales.map(p=>p.person_id);
@@ -25,28 +25,28 @@ function slicePeople(hris, cohortType, cohortKey){
   if (cohortType === "Person") return cohortKey ? [cohortKey] : [];
   return sales.map(p=>p.person_id);
 }
-
-// average of array (ignores null)
-function avg(arr){ const a = arr.filter(x=>typeof x==="number" && !isNaN(x)); return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0; }
+function avg(arr){
+  const a = arr.filter(x=>typeof x==="number" && !isNaN(x));
+  return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
+}
 
 /* ---------- Page component ---------- */
 function SalesPage({ cfg, hris, crm }) {
   const { useMemo, useState } = React;
 
   const regions = Array.from(new Set(hris.filter(p=>p.org_unit==="Sales").map(p=>p.region))).filter(Boolean).sort();
-  const persons = hris.filter(p=>p.org_unit==="Sales").map(p=>({id:p.person_id, name:p.name}));
+  const persons = hris.filter(p=>p.org_unit==="Sales").map(p=>({id:p.person_id, name:p.name||p.person_id}));
 
   const [cohortType, setCohortType] = useState("All");
   const [cohortKey, setCohortKey] = useState(regions[0] || "");
 
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
 
-  // build data per competency
   const cards = useMemo(() => {
     const byId = new Map(crm.map(r => [r.person_id, r]));
     return cfg.map(block => {
       const labels = block.metrics.map(m => m.label);
-      const targetData = block.metrics.map(_ => 5); // target = 5 on all axes
+      const targetData = block.metrics.map(() => 5);
       const currentData = block.metrics.map(m => {
         const vals = personIds.map(pid => byId.get(pid)?.[m.id]).filter(v => v!=null);
         const raw = avg(vals);
@@ -56,7 +56,6 @@ function SalesPage({ cfg, hris, crm }) {
     });
   }, [cfg, crm, JSON.stringify(personIds)]);
 
-  // layout 2 + 2 + 1
   const top2 = cards.slice(0,2);
   const mid2 = cards.slice(2,4);
   const last1 = cards.slice(4,5);
@@ -108,7 +107,8 @@ function SalesPage({ cfg, hris, crm }) {
     const root = document.getElementById("app");
     ReactDOM.createRoot(root).render(React.createElement(SalesPage, { cfg, hris, crm }));
   }catch(e){
-    document.getElementById("app").innerHTML = `<div class="card"><h3>Sales page failed to load</h3><div class="muted">${e.message}</div></div>`;
+    const el = document.getElementById("app");
+    el.innerHTML = `<div class="card"><h3>Sales page failed to load</h3><div class="muted">${e.message}</div></div>`;
     console.error(e);
   }
 })();
