@@ -1,138 +1,138 @@
 [
-  /* s001 */
+
   { "person_id":"s001","content_id":"pk_cert_accel_001","title":"Product Certification Accelerator","provider":"Internal Academy","related_metric":"cert_completion","timestamp":"2025-07-02T10:05:00Z","completion":true,"score":96 },
   { "person_id":"s001","content_id":"demo_accuracy_ll_201","title":"LinkedIn Learning: Demo Accuracy 201","provider":"LinkedIn Learning","related_metric":"demo_accuracy","timestamp":"2025-07-06T09:40:00Z","completion":true,"score":92 },
   { "person_id":"s001","content_id":"content_ops_playbook_v2","title":"Enablement Content Ops Playbook v2","provider":"Internal Academy","related_metric":"content_adoption","timestamp":"2025-07-09T15:11:00Z","completion":true,"score":90 },
   { "person_id":"s001","content_id":"conv_udemy_advanced","title":"Udemy: Advanced Call Conversion","provider":"Udemy","related_metric":"call_conversion","timestamp":"2025-07-14T13:25:00Z","completion":true,"score":93 },
   { "person_id":"s001","content_id":"sentiment_ai_coaching","title":"AI Coach: Customer Sentiment Signals","provider":"Internal Academy","related_metric":"sentiment","timestamp":"2025-07-18T11:02:00Z","completion":true,"score":88 },
 
-  /* s002 */
+
   { "person_id":"s002","content_id":"neg_margin_masterclass","title":"Negotiation Masterclass: Protect the Margin","provider":"Internal Academy","related_metric":"margin_retention","timestamp":"2025-07-03T12:10:00Z","completion":true,"score":91 },
   { "person_id":"s002","content_id":"contract_cycle_playbook","title":"Contract Cycle Time Playbook","provider":"Internal Academy","related_metric":"contract_cycle_days","timestamp":"2025-07-07T10:00:00Z","completion":true,"score":89 },
   { "person_id":"s002","content_id":"no_discount_deals_ll","title":"LinkedIn Learning: Discount‑Free Deals","provider":"LinkedIn Learning","related_metric":"discount_free_ratio","timestamp":"2025-07-12T14:18:00Z","completion":true,"score":90 },
   { "person_id":"s002","content_id":"winrate_udemy_boost","title":"Udemy: Win Rate Boosting Patterns","provider":"Udemy","related_metric":"win_rate_uplift","timestamp":"2025-07-16T09:45:00Z","completion":true,"score":86 },
   { "person_id":"s002","content_id":"demo_accuracy_pluralsight","title":"Pluralsight: Demo Accuracy Techniques","provider":"Pluralsight","related_metric":"demo_accuracy","timestamp":"2025-07-20T16:20:00Z","completion":true,"score":88 },
 
-  /* s003 */
+
   { "person_id":"s003","content_id":"crm_compliance_ll","title":"LinkedIn Learning: CRM Compliance Essentials","provider":"LinkedIn Learning","related_metric":"crm_compliance","timestamp":"2025-07-02T08:32:00Z","completion":true,"score":85 },
   { "person_id":"s003","content_id":"pipeline_hygiene_toolkit","title":"Pipeline Hygiene Toolkit","provider":"Internal Academy","related_metric":"pipeline_hygiene","timestamp":"2025-07-05T11:55:00Z","completion":true,"score":82 },
   { "person_id":"s003","content_id":"stage_velocity_udemy","title":"Udemy: Accelerate Stage Velocity","provider":"Udemy","related_metric":"stage_velocity_days","timestamp":"2025-07-09T10:14:00Z","completion":true,"score":80 },
   { "person_id":"s003","content_id":"call_openers_playbook","title":"Call Openers that Convert","provider":"Internal Academy","related_metric":"call_conversion","timestamp":"2025-07-15T12:40:00Z","completion":true,"score":78 },
   { "person_id":"s003","content_id":"expansion_lld_course","title":"LinkedIn Learning: Driving Expansion Revenue","provider":"LinkedIn Learning","related_metric":"expansion_pct","timestamp":"2025-07-22T13:18:00Z","completion":true,"score":83 },
 
-  /* s004 */
+
   { "person_id":"s004","content_id":"relationship_cadence_pkg","title":"Relationship Cadence Package","provider":"Internal Academy","related_metric":"engagement_freq","timestamp":"2025-07-03T15:05:00Z","completion":true,"score":84 },
   { "person_id":"s004","content_id":"retention_signals_ll","title":"LinkedIn Learning: Client Retention Signals","provider":"LinkedIn Learning","related_metric":"client_retention","timestamp":"2025-07-07T09:12:00Z","completion":true,"score":86 },
   { "person_id":"s004","content_id":"demo_dry_runs_room","title":"Internal: Demo Dry‑Runs & Accuracy Room","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-11T14:44:00Z","completion":true,"score":87 },
   { "person_id":"s004","content_id":"content_usage_guide","title":"Content Adoption: From Shelf to Sell","provider":"Internal Academy","related_metric":"content_adoption","timestamp":"2025-07-16T10:27:00Z","completion":true,"score":85 },
   { "person_id":"s004","content_id":"margin_guardrails_udemy","title":"Udemy: Margin Guardrails for AEs","provider":"Udemy","related_metric":"margin_retention","timestamp":"2025-07-21T16:02:00Z","completion":true,"score":88 },
 
-  /* s005 */
+
   { "person_id":"s005","content_id":"neg_anchor_batna","title":"Negotiation Anchoring & BATNA","provider":"Internal Academy","related_metric":"margin_retention","timestamp":"2025-07-02T09:20:00Z","completion":true,"score":95 },
   { "person_id":"s005","content_id":"fast_contracts_ps","title":"Pluralsight: Fast Contracts Patterns","provider":"Pluralsight","related_metric":"contract_cycle_days","timestamp":"2025-07-06T08:58:00Z","completion":true,"score":92 },
   { "person_id":"s005","content_id":"discount_alt_value","title":"Internal: Value‑Based Alternatives to Discounting","provider":"Internal Academy","related_metric":"discount_free_ratio","timestamp":"2025-07-10T15:30:00Z","completion":true,"score":93 },
   { "person_id":"s005","content_id":"discovery_to_win_udemy","title":"Udemy: Discovery to Win","provider":"Udemy","related_metric":"win_rate_uplift","timestamp":"2025-07-14T12:06:00Z","completion":true,"score":94 },
   { "person_id":"s005","content_id":"sentiment_ai_scoring","title":"AI Scoring for Sentiment in Calls","provider":"Internal Academy","related_metric":"sentiment","timestamp":"2025-07-19T11:40:00Z","completion":true,"score":91 },
 
-  /* s006 */
+
   { "person_id":"s006","content_id":"pk_refresh_micro","title":"Product Knowledge Micro‑Refresh","provider":"Internal Academy","related_metric":"cert_completion","timestamp":"2025-07-03T10:03:00Z","completion":true,"score":90 },
   { "person_id":"s006","content_id":"demo_accuracy_live","title":"Live Demo Accuracy Coaching","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-08T09:50:00Z","completion":true,"score":88 },
   { "person_id":"s006","content_id":"conversion_patterns_ll","title":"LinkedIn Learning: Conversion Patterns","provider":"LinkedIn Learning","related_metric":"call_conversion","timestamp":"2025-07-13T14:25:00Z","completion":true,"score":86 },
   { "person_id":"s006","content_id":"pipeline_sanitation_ps","title":"Pluralsight: Pipeline Sanitation","provider":"Pluralsight","related_metric":"pipeline_hygiene","timestamp":"2025-07-18T13:00:00Z","completion":true,"score":87 },
   { "person_id":"s006","content_id":"crm_truth_udemy","title":"Udemy: CRM as Single Source of Truth","provider":"Udemy","related_metric":"crm_compliance","timestamp":"2025-07-22T15:42:00Z","completion":true,"score":89 },
 
-  /* s007 */
+
   { "person_id":"s007","content_id":"retention_nudges","title":"Retention Nudges & Playbooks","provider":"Internal Academy","related_metric":"client_retention","timestamp":"2025-07-04T11:22:00Z","completion":true,"score":82 },
   { "person_id":"s007","content_id":"cadence_planner_ll","title":"LinkedIn Learning: Engagement Cadence Planner","provider":"LinkedIn Learning","related_metric":"engagement_freq","timestamp":"2025-07-09T10:07:00Z","completion":true,"score":80 },
   { "person_id":"s007","content_id":"expansion_maps_udemy","title":"Udemy: Mapping Expansion Paths","provider":"Udemy","related_metric":"expansion_pct","timestamp":"2025-07-12T09:59:00Z","completion":true,"score":81 },
   { "person_id":"s007","content_id":"contract_crash_course","title":"Contract Cycle Crash Course","provider":"Internal Academy","related_metric":"contract_cycle_days","timestamp":"2025-07-17T14:18:00Z","completion":true,"score":83 },
   { "person_id":"s007","content_id":"no_discount_platinum","title":"Platinum Deals without Discounts","provider":"Internal Academy","related_metric":"discount_free_ratio","timestamp":"2025-07-21T12:35:00Z","completion":true,"score":84 },
 
-  /* s008 */
+
   { "person_id":"s008","content_id":"demo_lab_accuracy_sims","title":"Demo Lab: Accuracy Simulations","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-05T08:44:00Z","completion":true,"score":85 },
   { "person_id":"s008","content_id":"content_usage_ll","title":"LinkedIn Learning: Content That Sells","provider":"LinkedIn Learning","related_metric":"content_adoption","timestamp":"2025-07-10T13:21:00Z","completion":true,"score":84 },
   { "person_id":"s008","content_id":"call_conversion_coach","title":"Conversion Coaching Circle","provider":"Internal Academy","related_metric":"call_conversion","timestamp":"2025-07-14T10:03:00Z","completion":true,"score":83 },
   { "person_id":"s008","content_id":"crm_rules_udemy","title":"Udemy: CRM Rules of Record","provider":"Udemy","related_metric":"crm_compliance","timestamp":"2025-07-18T09:12:00Z","completion":true,"score":86 },
   { "person_id":"s008","content_id":"pipeline_health_ps","title":"Pluralsight: Pipeline Health Checks","provider":"Pluralsight","related_metric":"pipeline_hygiene","timestamp":"2025-07-23T15:47:00Z","completion":true,"score":85 },
 
-  /* s009 */
+
   { "person_id":"s009","content_id":"neg_margin_fieldlab","title":"Negotiation Field Lab: Margin Retention","provider":"Internal Academy","related_metric":"margin_retention","timestamp":"2025-07-03T09:36:00Z","completion":true,"score":89 },
   { "person_id":"s009","content_id":"faster_contracts_ll","title":"LinkedIn Learning: Faster Contracts","provider":"LinkedIn Learning","related_metric":"contract_cycle_days","timestamp":"2025-07-08T11:08:00Z","completion":true,"score":87 },
   { "person_id":"s009","content_id":"value_over_discount","title":"Value Over Discounting","provider":"Internal Academy","related_metric":"discount_free_ratio","timestamp":"2025-07-12T12:42:00Z","completion":true,"score":88 },
   { "person_id":"s009","content_id":"sentiment_ps","title":"Pluralsight: Reading Sentiment in Calls","provider":"Pluralsight","related_metric":"sentiment","timestamp":"2025-07-16T14:25:00Z","completion":true,"score":86 },
   { "person_id":"s009","content_id":"winrate_patterns_pro","title":"Win Rate Patterns Pro","provider":"Internal Academy","related_metric":"win_rate_uplift","timestamp":"2025-07-20T10:55:00Z","completion":true,"score":90 },
 
-  /* s010 */
+
   { "person_id":"s010","content_id":"pk_cert_elite","title":"Product Certification Elite","provider":"Internal Academy","related_metric":"cert_completion","timestamp":"2025-07-01T08:40:00Z","completion":true,"score":98 },
   { "person_id":"s010","content_id":"demo_accuracy_gold","title":"Demo Accuracy Gold Standard","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-05T10:14:00Z","completion":true,"score":96 },
   { "person_id":"s010","content_id":"conversion_udemy_prime","title":"Udemy: Prime Call Conversion","provider":"Udemy","related_metric":"call_conversion","timestamp":"2025-07-09T13:30:00Z","completion":true,"score":95 },
   { "person_id":"s010","content_id":"margin_platinum_ps","title":"Pluralsight: Margin Platinum","provider":"Pluralsight","related_metric":"margin_retention","timestamp":"2025-07-13T09:45:00Z","completion":true,"score":94 },
   { "person_id":"s010","content_id":"expansion_motion_ll","title":"LinkedIn Learning: Expansion Motions","provider":"LinkedIn Learning","related_metric":"expansion_pct","timestamp":"2025-07-18T16:18:00Z","completion":true,"score":92 },
 
-  /* s011 */
+  
   { "person_id":"s011","content_id":"crm_zero_gap","title":"CRM Zero‑Gap Compliance","provider":"Internal Academy","related_metric":"crm_compliance","timestamp":"2025-07-04T11:15:00Z","completion":true,"score":88 },
   { "person_id":"s011","content_id":"pipeline_cleanroom","title":"Pipeline Clean‑Room Workshop","provider":"Internal Academy","related_metric":"pipeline_hygiene","timestamp":"2025-07-08T15:22:00Z","completion":true,"score":87 },
   { "person_id":"s011","content_id":"velocity_shortening","title":"Shortening Stage Velocity","provider":"Internal Academy","related_metric":"stage_velocity_days","timestamp":"2025-07-12T09:05:00Z","completion":true,"score":86 },
   { "person_id":"s011","content_id":"sentiment_labs","title":"Sentiment Analysis Labs","provider":"Internal Academy","related_metric":"sentiment","timestamp":"2025-07-16T14:40:00Z","completion":true,"score":85 },
   { "person_id":"s011","content_id":"content_flywheel_ll","title":"LinkedIn Learning: Content Flywheel","provider":"LinkedIn Learning","related_metric":"content_adoption","timestamp":"2025-07-20T10:30:00Z","completion":true,"score":86 },
 
-  /* s012 */
+
   { "person_id":"s012","content_id":"demo_nerves_control","title":"Controlling Demo Nerves","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-03T10:52:00Z","completion":true,"score":80 },
   { "person_id":"s012","content_id":"conversion_basics_udemy","title":"Udemy: Conversion Basics","provider":"Udemy","related_metric":"call_conversion","timestamp":"2025-07-07T12:48:00Z","completion":true,"score":79 },
   { "person_id":"s012","content_id":"retention_guardrails","title":"Retention Guardrails","provider":"Internal Academy","related_metric":"client_retention","timestamp":"2025-07-11T09:06:00Z","completion":true,"score":81 },
   { "person_id":"s012","content_id":"pipeline_basics_ll","title":"LinkedIn Learning: Pipeline Basics","provider":"LinkedIn Learning","related_metric":"pipeline_hygiene","timestamp":"2025-07-16T13:20:00Z","completion":true,"score":80 },
   { "person_id":"s012","content_id":"crm_habits_ps","title":"Pluralsight: CRM Habits","provider":"Pluralsight","related_metric":"crm_compliance","timestamp":"2025-07-21T11:44:00Z","completion":true,"score":82 },
 
-  /* s013 */
+
   { "person_id":"s013","content_id":"value_negotiation_live","title":"Live: Value‑Based Negotiation","provider":"Internal Academy","related_metric":"discount_free_ratio","timestamp":"2025-07-04T09:30:00Z","completion":true,"score":89 },
   { "person_id":"s013","content_id":"contract_redlines_ll","title":"LinkedIn Learning: Contract Redlines","provider":"LinkedIn Learning","related_metric":"contract_cycle_days","timestamp":"2025-07-08T10:18:00Z","completion":true,"score":87 },
   { "person_id":"s013","content_id":"margin_save_room","title":"Margin Save Room","provider":"Internal Academy","related_metric":"margin_retention","timestamp":"2025-07-12T13:02:00Z","completion":true,"score":90 },
   { "person_id":"s013","content_id":"expansion_play_udemy","title":"Udemy: Expansion Plays","provider":"Udemy","related_metric":"expansion_pct","timestamp":"2025-07-16T15:33:00Z","completion":true,"score":86 },
   { "person_id":"s013","content_id":"engagement_planner_ps","title":"Pluralsight: Engagement Planner","provider":"Pluralsight","related_metric":"engagement_freq","timestamp":"2025-07-21T09:58:00Z","completion":true,"score":85 },
 
-  /* s014 */
+
   { "person_id":"s014","content_id":"crm_cleanup_live","title":"Live: CRM Clean‑Up Sprint","provider":"Internal Academy","related_metric":"crm_compliance","timestamp":"2025-07-05T08:12:00Z","completion":true,"score":78 },
   { "person_id":"s014","content_id":"pipeline_triage_ll","title":"LinkedIn Learning: Pipeline Triage","provider":"LinkedIn Learning","related_metric":"pipeline_hygiene","timestamp":"2025-07-09T09:44:00Z","completion":true,"score":77 },
   { "person_id":"s014","content_id":"velocity_bootcamp","title":"Stage Velocity Bootcamp","provider":"Internal Academy","related_metric":"stage_velocity_days","timestamp":"2025-07-13T11:05:00Z","completion":true,"score":79 },
   { "person_id":"s014","content_id":"conversion_micro_udemy","title":"Udemy: Conversion Micro‑Skills","provider":"Udemy","related_metric":"call_conversion","timestamp":"2025-07-17T13:17:00Z","completion":true,"score":76 },
   { "person_id":"s014","content_id":"demo_basics_ps","title":"Pluralsight: Demo Basics","provider":"Pluralsight","related_metric":"demo_accuracy","timestamp":"2025-07-22T10:56:00Z","completion":true,"score":80 },
 
-  /* s015 */
+
   { "person_id":"s015","content_id":"sentiment_ai_adv","title":"AI Sentiment Advanced","provider":"Internal Academy","related_metric":"sentiment","timestamp":"2025-07-02T12:22:00Z","completion":true,"score":90 },
   { "person_id":"s015","content_id":"expansion_signal_map","title":"Mapping Expansion Signals","provider":"Internal Academy","related_metric":"expansion_pct","timestamp":"2025-07-06T15:11:00Z","completion":true,"score":88 },
   { "person_id":"s015","content_id":"contract_speed_ll","title":"LinkedIn Learning: Contract Speed","provider":"LinkedIn Learning","related_metric":"contract_cycle_days","timestamp":"2025-07-10T09:40:00Z","completion":true,"score":89 },
   { "person_id":"s015","content_id":"discount_alt_pro_udemy","title":"Udemy: Discount Alternatives Pro","provider":"Udemy","related_metric":"discount_free_ratio","timestamp":"2025-07-14T12:08:00Z","completion":true,"score":90 },
   { "person_id":"s015","content_id":"cert_refresh_plus","title":"Certification Refresh Plus","provider":"Internal Academy","related_metric":"cert_completion","timestamp":"2025-07-18T10:29:00Z","completion":true,"score":92 },
 
-  /* s016 */
+
   { "person_id":"s016","content_id":"demo_worldclass_room","title":"World‑Class Demo Room","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-01T09:05:00Z","completion":true,"score":97 },
   { "person_id":"s016","content_id":"winrate_blackbelt","title":"Win Rate Black Belt","provider":"Internal Academy","related_metric":"win_rate_uplift","timestamp":"2025-07-05T11:22:00Z","completion":true,"score":95 },
   { "person_id":"s016","content_id":"margin_blackline_ll","title":"LinkedIn Learning: Margin Blackline","provider":"LinkedIn Learning","related_metric":"margin_retention","timestamp":"2025-07-09T13:44:00Z","completion":true,"score":96 },
   { "person_id":"s016","content_id":"content_orchestration_ps","title":"Pluralsight: Content Orchestration","provider":"Pluralsight","related_metric":"content_adoption","timestamp":"2025-07-13T10:14:00Z","completion":true,"score":94 },
   { "person_id":"s016","content_id":"conversion_framing_udemy","title":"Udemy: Conversion Framing","provider":"Udemy","related_metric":"call_conversion","timestamp":"2025-07-17T16:09:00Z","completion":true,"score":93 },
 
-  /* s017 */
+ 
   { "person_id":"s017","content_id":"rel_health_checker","title":"Relationship Health Checker","provider":"Internal Academy","related_metric":"client_retention","timestamp":"2025-07-03T08:30:00Z","completion":true,"score":82 },
   { "person_id":"s017","content_id":"cadence_micro_ll","title":"LinkedIn Learning: Micro‑Cadence","provider":"LinkedIn Learning","related_metric":"engagement_freq","timestamp":"2025-07-07T11:55:00Z","completion":true,"score":80 },
   { "person_id":"s017","content_id":"expansion_playground","title":"Expansion Playground","provider":"Internal Academy","related_metric":"expansion_pct","timestamp":"2025-07-11T14:25:00Z","completion":true,"score":81 },
   { "person_id":"s017","content_id":"crm_daily_udemy","title":"Udemy: CRM Daily Discipline","provider":"Udemy","related_metric":"crm_compliance","timestamp":"2025-07-15T09:18:00Z","completion":true,"score":82 },
   { "person_id":"s017","content_id":"pipeline_triage_ps","title":"Pluralsight: Pipeline Triage","provider":"Pluralsight","related_metric":"pipeline_hygiene","timestamp":"2025-07-20T10:51:00Z","completion":true,"score":83 },
 
-  /* s018 */
+
   { "person_id":"s018","content_id":"demo_accuracy_cohort","title":"Cohort: Demo Accuracy","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-04T10:07:00Z","completion":true,"score":90 },
   { "person_id":"s018","content_id":"conversion_signal_ll","title":"LinkedIn Learning: Conversion Signals","provider":"LinkedIn Learning","related_metric":"call_conversion","timestamp":"2025-07-08T12:30:00Z","completion":true,"score":88 },
   { "person_id":"s018","content_id":"winrate_design_udemy","title":"Udemy: Designing for Win Rate","provider":"Udemy","related_metric":"win_rate_uplift","timestamp":"2025-07-12T16:02:00Z","completion":true,"score":89 },
   { "person_id":"s018","content_id":"margin_room_pro","title":"Margin Retention Room (Pro)","provider":"Internal Academy","related_metric":"margin_retention","timestamp":"2025-07-16T09:42:00Z","completion":true,"score":90 },
   { "person_id":"s018","content_id":"contract_shortcuts_ps","title":"Pluralsight: Contract Shortcuts","provider":"Pluralsight","related_metric":"contract_cycle_days","timestamp":"2025-07-21T14:15:00Z","completion":true,"score":90 },
 
-  /* s019 */
+
   { "person_id":"s019","content_id":"content_usage_pro","title":"Content Usage Pro","provider":"Internal Academy","related_metric":"content_adoption","timestamp":"2025-07-03T13:45:00Z","completion":true,"score":91 },
   { "person_id":"s019","content_id":"relationship_system_ll","title":"LinkedIn Learning: Relationship System","provider":"LinkedIn Learning","related_metric":"client_retention","timestamp":"2025-07-07T09:33:00Z","completion":true,"score":90 },
   { "person_id":"s019","content_id":"engagement_playbook","title":"Engagement Frequency Playbook","provider":"Internal Academy","related_metric":"engagement_freq","timestamp":"2025-07-11T15:18:00Z","completion":true,"score":89 },
   { "person_id":"s019","content_id":"expansion_ops_udemy","title":"Udemy: Expansion Ops","provider":"Udemy","related_metric":"expansion_pct","timestamp":"2025-07-15T12:40:00Z","completion":true,"score":90 },
   { "person_id":"s019","content_id":"crm_no_gaps_ps","title":"Pluralsight: No Gaps CRM","provider":"Pluralsight","related_metric":"crm_compliance","timestamp":"2025-07-19T10:06:00Z","completion":true,"score":92 },
 
-  /* s020 */
+ 
   { "person_id":"s020","content_id":"demo_accuracy_starter","title":"Demo Accuracy Starter","provider":"Internal Academy","related_metric":"demo_accuracy","timestamp":"2025-07-05T09:11:00Z","completion":true,"score":78 },
   { "person_id":"s020","content_id":"conversion_foundations_ll","title":"LinkedIn Learning: Conversion Foundations","provider":"LinkedIn Learning","related_metric":"call_conversion","timestamp":"2025-07-09T11:37:00Z","completion":true,"score":76 },
   { "person_id":"s020","content_id":"value_vs_discount_udemy","title":"Udemy: Value vs Discounting","provider":"Udemy","related_metric":"discount_free_ratio","timestamp":"2025-07-13T13:59:00Z","completion":true,"score":79 },
