@@ -56,9 +56,9 @@ function SalesPage({ cfg, hris, crm }) {
     });
   }, [cfg, crm, JSON.stringify(personIds)]);
 
-  const top2 = cards.slice(0,2);
-  const mid2 = cards.slice(2,4);
-  const last1 = cards.slice(4,5);
+  // layout 3 + 2
+  const top3 = cards.slice(0,3);
+  const bottom2 = cards.slice(3,5);
 
   return React.createElement(React.Fragment, null,
     React.createElement("header", null,
@@ -84,14 +84,11 @@ function SalesPage({ cfg, hris, crm }) {
       )
     ),
 
-    React.createElement("div", { className:"grid-2", style:{marginTop:16} },
-      ...top2.map((c,i) => React.createElement(RadarCard, { key:"t"+i, ...c, height:300 }))
+    React.createElement("div", { className:"grid-3", style:{marginTop:16} },
+      ...top3.map((c,i) => React.createElement(RadarCard, { key:"t"+i, ...c, height:360 }))
     ),
     React.createElement("div", { className:"grid-2", style:{marginTop:16} },
-      ...mid2.map((c,i) => React.createElement(RadarCard, { key:"m"+i, ...c, height:300 }))
-    ),
-    React.createElement("div", { className:"grid-1", style:{marginTop:16} },
-      ...last1.map((c,i) => React.createElement(RadarCard, { key:"b"+i, ...c, height:320 }))
+      ...bottom2.map((c,i) => React.createElement(RadarCard, { key:"b"+i, ...c, height:360 }))
     )
   );
 }
