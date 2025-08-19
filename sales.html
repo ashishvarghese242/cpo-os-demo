@@ -13,7 +13,7 @@
     .grid-1{ display:grid; grid-template-columns: 1fr; gap:16px; max-width: 720px; margin: 0 auto; }
     .radar-title{ margin:0 0 8px 0; font-weight:700; }
   </style>
-  <!-- React + Chart.js (globals) -->
+  <!-- UMD globals -->
   <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
@@ -36,8 +36,7 @@
     <div id="app"></div>
   </div>
 
-  <!-- Page code (ES modules) -->
-  <script type="module" src="./components/RadarCard.js"></script>
+  <!-- Only the bootstrap; it imports the component itself -->
   <script type="module" src="./app/boot/sales.js"></script>
 </body>
 </html>
