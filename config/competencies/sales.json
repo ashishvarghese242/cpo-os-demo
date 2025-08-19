@@ -1,0 +1,42 @@
+[
+  {
+    "competency": "Product Knowledge",
+    "metrics": [
+      { "id":"cert_completion",   "label":"Certification Completion",    "weight":1, "higher_is_better": true, "floor": 0.50, "target": 0.95 },
+      { "id":"demo_accuracy",     "label":"Demo Accuracy Rate",          "weight":1, "higher_is_better": true, "floor": 0.70, "target": 0.98 },
+      { "id":"content_adoption",  "label":"Enablement Content Adoption", "weight":1, "higher_is_better": true, "floor": 0.30, "target": 0.80 }
+    ]
+  },
+  {
+    "competency": "Communication Skills",
+    "metrics": [
+      { "id":"win_rate_uplift",   "label":"Win Rate Uplift",         "weight":1, "higher_is_better": true,  "floor": 0.00, "target": 0.20 },
+      { "id":"call_conversion",   "label":"Call Conversion Ratio",    "weight":1, "higher_is_better": true,  "floor": 0.15, "target": 0.45 },
+      { "id":"sentiment",         "label":"Customer Sentiment Score", "weight":1, "higher_is_better": true,  "floor": 0.50, "target": 0.95 }
+    ]
+  },
+  {
+    "competency": "Negotiation Skills",
+    "metrics": [
+      { "id":"margin_retention",     "label":"Margin Retention Rate",   "weight":1, "higher_is_better": true,  "floor": 0.70, "target": 0.95 },
+      { "id":"contract_cycle_days",  "label":"Contract Cycle Time",     "weight":1, "higher_is_better": false, "floor": 60,   "target": 25   },
+      { "id":"discount_free_ratio",  "label":"Discount Dependency Index","weight":1, "higher_is_better": true,  "floor": 0.30, "target": 0.80 }
+    ]
+  },
+  {
+    "competency": "Relationship Building",
+    "metrics": [
+      { "id":"client_retention",  "label":"Client Retention Rate",   "weight":1, "higher_is_better": true,  "floor": 0.85, "target": 0.98 },
+      { "id":"engagement_freq",   "label":"Engagement Frequency",    "weight":1, "higher_is_better": true,  "floor": 3,    "target": 10    },
+      { "id":"expansion_pct",     "label":"Expansion Revenue %",     "weight":1, "higher_is_better": true,  "floor": 0.05, "target": 0.25 }
+    ]
+  },
+  {
+    "competency": "Sales Process Mastery",
+    "metrics": [
+      { "id":"crm_compliance",      "label":"CRM Compliance Score",   "weight":1, "higher_is_better": true,  "floor": 0.70, "target": 0.98 },
+      { "id":"pipeline_hygiene",    "label":"Pipeline Hygiene Rate",  "weight":1, "higher_is_better": true,  "floor": 0.60, "target": 0.95 },
+      { "id":"stage_velocity_days", "label":"Sales Stage Velocity",   "weight":1, "higher_is_better": false, "floor": 9,    "target": 3     }
+    ]
+  }
+]
