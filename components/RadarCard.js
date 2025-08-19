@@ -56,7 +56,7 @@ export default function RadarCard({ title, labels, targetData, currentData, heig
           r: {
             suggestedMin: 0, suggestedMax: 5,
             ticks: { stepSize: 1, backdropColor: "transparent", color: textColor, font: { size: 12 } },
-            pointLabels: { color: textColor, font: { size: 14, weight: "600" } },
+            pointLabels: { color: textColor, font: { size: 14 } },
             grid: { color: "rgba(2,6,23,0.08)" },
             angleLines: { color: "rgba(2,6,23,0.12)" }
           }
