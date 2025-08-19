@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>CPO OS • Sales</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="./assets/theme.css" rel="stylesheet" />
+  <style>
+    .nav { display:flex; gap:12px; align-items:center; margin:16px 0; }
+    .nav a{ text-decoration:none; font-weight:600; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--text); }
+    .nav a[aria-disabled="true"]{ color:#9ca3af; pointer-events:none; background:#f9fafb; }
+    .grid-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px; }
+    .grid-1{ display:grid; grid-template-columns: 1fr; gap:16px; max-width: 720px; margin: 0 auto; }
+    .radar-title{ margin:0 0 8px 0; font-weight:700; }
+  </style>
+  <!-- React + Chart.js (globals) -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Sales • Competency Radar Suite</h1>
+      <p>Strengthen the competencies that move revenue outcomes. Benchmarks derived from top performers.</p>
+    </div>
+
+    <div class="nav">
+      <a href="./sales.html">Sales</a>
+      <a href="./cs.html" aria-disabled="true">CS (coming soon)</a>
+      <a href="./production.html" aria-disabled="true">Production (coming soon)</a>
+      <span style="margin-left:auto"></span>
+      <a href="./index.html">Home</a>
+    </div>
+
+    <div id="app"></div>
+  </div>
+
+  <!-- Page code (ES modules) -->
+  <script type="module" src="./components/RadarCard.js"></script>
+  <script type="module" src="./app/boot/sales.js"></script>
+</body>
+</html>
