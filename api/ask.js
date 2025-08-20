@@ -1,12 +1,13 @@
 // api/ask.js
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
+
 export default async function handler(req, res) {
   // --- CORS ---
   const origin = req.headers.origin || "";
   const allowList = (process.env.ALLOWED_ORIGINS || "")
     .split(",").map(s => s.trim()).filter(Boolean);
-
   const isAllowed = allowList.length === 0 || allowList.includes(origin);
-  // If no allowList provided, default to "*" to avoid sending an empty string
   res.setHeader("Access-Control-Allow-Origin", isAllowed ? (origin || "*") : "null");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
   if (!OPENAI_API_KEY) return res.status(500).json({ error: "Server missing OPENAI_API_KEY" });
 
   try {
-    const { query, scope = "sales", context = {} } = req.body || {};
+    const { query, scope = "sales", context = {}, format = "html" } = req.body || {};
     if (!query) return res.status(400).json({ error: "Missing 'query'" });
 
     // Keep payloads reasonable
@@ -28,7 +29,8 @@ export default async function handler(req, res) {
       return res.status(413).json({ error: "Context too large (>1.5MB). Send summarized slices." });
     }
 
-    // --- FIX: systemPrompt must be a string (template literal), and removed trailing stray backtick ---
+    const wantsHtml = String(format).toLowerCase() === "html";
+
     const systemPrompt = `
 You are **Enablement GPT** — a Ph.D.-level **VP/Chief Enablement Executive** and C-suite advisor.
 You synthesize performance, training, content, CRM, LMS, HR, finance, engineering/manufacturing, and telemetry data to guide enterprise decisions.
@@ -73,9 +75,11 @@ RESPONSE FORMAT (use this section order unless user asks otherwise)
 MATH & CITATIONS
 - Always show the formula skeletons for ROI/COI and any forecast.
 - For each metric, append [Source: <system/file/table>, <owner>, <as-of date>].
+
+OUTPUT STYLE
+${wantsHtml ? "- Output **valid semantic HTML only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers.\n" : "- Output in Markdown."}
 `.trim();
 
-    // Pass the JSON slices your page already loaded from /data/*.json
     const userPayload = { scope, query, data: context };
 
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -87,8 +91,7 @@ MATH & CITATIONS
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.2,
-        // (Optional) add a token cap to avoid runaway responses
-        max_tokens: 1200,
+        max_tokens: 1400,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: JSON.stringify(userPayload) }
@@ -102,8 +105,31 @@ MATH & CITATIONS
     }
 
     const out = await r.json();
-    const content = out?.choices?.[0]?.message?.content || "";
-    return res.status(200).json({ answer: content, model: out?.model, usage: out?.usage });
+    const raw = out?.choices?.[0]?.message?.content ?? "";
+
+    // Convert anything (Markdown or HTML) to safe, render-ready HTML
+    const html = marked.parse(raw);
+    const safeHtml = sanitizeHtml(html, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+        "img","table","thead","tbody","tr","th","td","h1","h2","h3","pre","code"
+      ]),
+      allowedAttributes: {
+        a: ["href", "name", "target", "rel"],
+        img: ["src", "alt", "title", "width", "height"],
+        td: ["colspan", "rowspan"],
+        th: ["colspan", "rowspan"]
+      },
+      transformTags: {
+        a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" })
+      }
+    });
+
+    return res.status(200).json({
+      answer: safeHtml,
+      format: "html",
+      model: out?.model,
+      usage: out?.usage
+    });
   } catch (err) {
     return res.status(500).json({ error: "Server exception", detail: String(err) });
   }
