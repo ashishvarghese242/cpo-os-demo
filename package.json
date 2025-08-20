@@ -1,4 +1,6 @@
 {
+  "name": "cpo-os-demo",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "marked": "^12.0.2",
