@@ -42,7 +42,8 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "OpenAI-Project": "CPO OS"
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
