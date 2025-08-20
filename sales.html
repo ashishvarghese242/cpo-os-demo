@@ -1,23 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CPO OS — Sales</title>
-  <link rel="stylesheet" href="assets/theme.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-radar"></script>
+  <meta charset="utf-8" />
+  <title>CPO OS • Sales</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="./assets/theme.css" rel="stylesheet" />
+
+  <!-- UMD globals REQUIRED for your existing React radars -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
 </head>
 <body>
   <div class="wrap">
-
-    <!-- Hero Banner -->
+    <!-- Hero -->
     <div class="hero">
       <h1>Sales — Competency Radars</h1>
       <p>Where we are vs where we need to be (benchmarked to top performers)</p>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- Top bar (kept simple) -->
     <header>
       <div class="brand">
         <span class="badge">CPO OS</span>
@@ -29,38 +31,16 @@
       </select>
     </header>
 
-    <!-- 2-Column Layout -->
+    <!-- Global 50/50 layout -->
     <div class="layout-2col">
-      
-      <!-- Left: Radars -->
+      <!-- LEFT: your existing React app renders all radars into #app -->
       <div class="left-col">
         <div class="radar-scale">
-          <div class="grid-3">
-            <div class="card">
-              <h3>Product Knowledge</h3>
-              <canvas id="radar1"></canvas>
-            </div>
-            <div class="card">
-              <h3>Communication Skills</h3>
-              <canvas id="radar2"></canvas>
-            </div>
-            <div class="card">
-              <h3>Negotiation Skills</h3>
-              <canvas id="radar3"></canvas>
-            </div>
-            <div class="card">
-              <h3>Relationship Building</h3>
-              <canvas id="radar4"></canvas>
-            </div>
-            <div class="card">
-              <h3>Sales Process Mastery</h3>
-              <canvas id="radar5"></canvas>
-            </div>
-          </div>
+          <div id="app"></div>
         </div>
       </div>
 
-      <!-- Right: GPT Panel -->
+      <!-- RIGHT: EnablementGPT (sticky) -->
       <aside class="right-col card sticky">
         <div class="gpt-head">
           <h2 class="gpt-title">EnablementGPT</h2>
@@ -74,19 +54,17 @@
             <button class="gpt-chip">Give me 3 actions to lift win rate next month.</button>
           </div>
           <div class="gpt-row">
-            <input id="gpt-input" class="gpt-input" placeholder="Ask a question...">
+            <input id="gpt-input" class="gpt-input" placeholder="Ask a question..." />
             <button id="gpt-btn" class="gpt-btn">Ask</button>
           </div>
           <div id="gpt-out" class="gpt-out"></div>
         </div>
       </aside>
+    </div>
+  </div>
 
-    </div><!-- end layout-2col -->
-
-  </div><!-- end wrap -->
-
-  <!-- Scripts -->
-  <script src="./app/boot/sales.js"></script>
-  <script src="./app/boot/enablement-gpt.js"></script>
+  <!-- Boot scripts (unchanged) -->
+  <script type="module" src="./app/boot/sales.js"></script>
+  <script type="module" src="./app/boot/enablement-gpt.js"></script>
 </body>
 </html>
