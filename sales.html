@@ -40,9 +40,16 @@
       <a href="./index.html">Home</a>
     </div>
 
+    <!-- Existing React app mount (radars) -->
     <div id="app"></div>
+
+    <!-- NEW: separate mount for the EnablementGPT card -->
+    <div id="enablement-gpt" style="margin-top:16px;"></div>
   </div>
 
+  <!-- Existing boot for radars -->
   <script type="module" src="./app/boot/sales.js"></script>
+  <!-- NEW: boot for the EnablementGPT card (will use your existing CRM/HRIS/LRS JSON + /api/ask) -->
+  <script type="module" src="./app/boot/enablement-gpt.js"></script>
 </body>
 </html>
