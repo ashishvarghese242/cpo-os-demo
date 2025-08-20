@@ -1,18 +1,20 @@
 // api/ask.js
 export default async function handler(req, res) {
-  // CORS
+  // --- CORS ---
   const origin = req.headers.origin || "";
   const allowList = (process.env.ALLOWED_ORIGINS || "")
     .split(",").map(s => s.trim()).filter(Boolean);
+
   const isAllowed = allowList.length === 0 || allowList.includes(origin);
-  res.setHeader("Access-Control-Allow-Origin", isAllowed ? origin : "null");
+  // If no allowList provided, default to "*" to avoid sending an empty string
+  res.setHeader("Access-Control-Allow-Origin", isAllowed ? (origin || "*") : "null");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Vary", "Origin");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST /api/ask" });
 
-  // Secrets
+  // --- Secrets ---
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
   if (!OPENAI_API_KEY) return res.status(500).json({ error: "Server missing OPENAI_API_KEY" });
 
@@ -26,7 +28,8 @@ export default async function handler(req, res) {
       return res.status(413).json({ error: "Context too large (>1.5MB). Send summarized slices." });
     }
 
-    const systemPrompt = [
+    // --- FIX: systemPrompt must be a string (template literal), and removed trailing stray backtick ---
+    const systemPrompt = `
 You are **Enablement GPT** — a Ph.D.-level **VP/Chief Enablement Executive** and C-suite advisor.
 You synthesize performance, training, content, CRM, LMS, HR, finance, engineering/manufacturing, and telemetry data to guide enterprise decisions.
 You are cross-functional (Sales, Customer Success, Engineering/Production, Manufacturing) and operate with **financial rigor** and **instructional design depth**.
@@ -70,22 +73,22 @@ RESPONSE FORMAT (use this section order unless user asks otherwise)
 MATH & CITATIONS
 - Always show the formula skeletons for ROI/COI and any forecast.
 - For each metric, append [Source: <system/file/table>, <owner>, <as-of date>].
-`
-].join(" ");
+`.trim();
 
     // Pass the JSON slices your page already loaded from /data/*.json
     const userPayload = { scope, query, data: context };
 
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-headers: {
-  "Authorization": `Bearer ${OPENAI_API_KEY}`,
-  "Content-Type": "application/json"
-},
-
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.2,
+        // (Optional) add a token cap to avoid runaway responses
+        max_tokens: 1200,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: JSON.stringify(userPayload) }
