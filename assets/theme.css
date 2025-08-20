@@ -126,3 +126,58 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 .kpi.negative .big{ color:#b42318; } /* red */
 .kpi.neutral .big{ color:#0f172a; }
 .kpi .sub{ font-size:12px; color: var(--muted); margin-top:4px; }
+
+/* ========================================================= */
+/* =========== Global Enablement Layout (50/50) ============ */
+/* ========================================================= */
+
+.layout-2col{
+  display:grid;
+  grid-template-columns: 1fr 1fr; /* left: radars, right: GPT */
+  gap:20px;
+  align-items:start;
+}
+.left-col{ min-width:0; }
+.right-col{ min-width:0; }
+
+/* Slightly scale radar area so it comfortably fits half page */
+.radar-scale{
+  transform: scale(0.92);
+  transform-origin: top left;
+}
+
+/* Keep GPT panel visible while scrolling on desktop */
+.sticky{ position: sticky; top: 16px; }
+
+/* ---- EnablementGPT UI helpers (shared across pages) ---- */
+.gpt-head{ display:flex; align-items:center; gap:8px; padding:14px 16px; border-bottom:1px solid var(--line); }
+.gpt-title{ font-size:16px; font-weight:700; margin:0; }
+.gpt-badge{ margin-left:auto; font-size:12px; color:#059669; background:#ecfdf5; border:1px solid #a7f3d0; padding:2px 8px; border-radius:999px; }
+
+.gpt-body{ padding:12px; display:grid; gap:10px; }
+.gpt-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; }
+.gpt-input{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; outline:none; background:#fff; }
+.gpt-btn{ padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#111827; color:#fff; font-weight:600; cursor:pointer; }
+.gpt-btn[disabled]{ background:#f3f4f6; color:#6b7280; cursor:default; }
+
+.gpt-presets{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; } /* gap before output */
+.gpt-chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:12px; background:#fff; cursor:pointer; }
+.gpt-chip:hover{ background:#f9fafb; }
+
+.gpt-out{
+  white-space:pre-wrap;
+  font-size:14px; line-height:1.55;
+  color:#111827;
+  background:#f9fafb; border:1px dashed var(--line); border-radius:10px; padding:12px; min-height:140px;
+}
+
+.gpt-foot{ display:flex; align-items:center; justify-content:space-between; color:#6b7280; font-size:12px; }
+.gpt-actions{ display:flex; gap:8px; }
+.gpt-action{ border:1px solid var(--line); background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; font-size:12px; }
+
+/* --------- responsive --------- */
+@media (max-width: 1024px){
+  .layout-2col{ grid-template-columns: 1fr; }
+  .sticky{ position: static; }
+  .radar-scale{ transform: none; }
+}
