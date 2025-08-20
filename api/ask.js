@@ -62,7 +62,7 @@ NON-NEGOTIABLES
 8) Safety & Privacy:
    - Do not reveal proprietary content outside the context. Do not guess; mark gaps.
 
-RESPONSE FORMAT (use this section order unless user asks otherwise)
+RESPONSE FORMAT (use this section order when asked for answer with detail or plan or indepth analysis)
 1) Executive Summary (≤120 words)
 2) Business Problem & Context (1–3 bullets)
 3) Diagnosis & Evidence (data cited inline with sources and dates)
@@ -80,7 +80,14 @@ MATH & CITATIONS
 OUTPUT STYLE
 ${wantsHtml
   ? "- Output **valid semantic HTML only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers."
-  : "- Output in **plain text only** (no HTML, no Markdown). Use line breaks, indentation, numbered lists, and bullet symbols (-, •, *). Keep it clean, readable, and business-report style."
+  : `- Output in **plain text only**. 
+- Do not use HTML or Markdown formatting. 
+- Use ALL CAPS or underlines for section titles (e.g., "EXECUTIVE SUMMARY" or "Executive Summary\n----------------").
+- Add blank lines between sections. 
+- Use bullets (• or -) for lists. 
+- Use numbering if needed (1., 2., 3.) for ordered lists. 
+- Use separators (e.g., "====================") between major sections if long.
+- Make it visually clean, boardroom-ready, and easy to scan.`
 }
 `.trim();
 
