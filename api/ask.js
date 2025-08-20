@@ -20,7 +20,8 @@ export default async function handler(req, res) {
   if (!OPENAI_API_KEY) return res.status(500).json({ error: "Server missing OPENAI_API_KEY" });
 
   try {
-    const { query, scope = "sales", context = {}, format = "html" } = req.body || {};
+    // NOTE: default format changed from "html" -> "text"
+    const { query, scope = "sales", context = {}, format = "text" } = req.body || {};
     if (!query) return res.status(400).json({ error: "Missing 'query'" });
 
     // Keep payloads reasonable
@@ -77,7 +78,10 @@ MATH & CITATIONS
 - For each metric, append [Source: <system/file/table>, <owner>, <as-of date>].
 
 OUTPUT STYLE
-${wantsHtml ? "- Output **valid semantic HTML only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers.\n" : "- Output in Markdown."}
+${wantsHtml
+  ? "- Output **valid semantic HTML only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers."
+  : "- Output in **plain text only** (no HTML, no Markdown). Use line breaks, indentation, numbered lists, and bullet symbols (-, •, *). Keep it clean, readable, and business-report style."
+}
 `.trim();
 
     const userPayload = { scope, query, data: context };
@@ -89,7 +93,7 @@ ${wantsHtml ? "- Output **valid semantic HTML only** (no Markdown). Use headings
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o-mini", // keep as-is; upgrade later if needed
         temperature: 0.2,
         max_tokens: 1400,
         messages: [
@@ -107,29 +111,40 @@ ${wantsHtml ? "- Output **valid semantic HTML only** (no Markdown). Use headings
     const out = await r.json();
     const raw = out?.choices?.[0]?.message?.content ?? "";
 
-    // Convert anything (Markdown or HTML) to safe, render-ready HTML
-    const html = marked.parse(raw);
-    const safeHtml = sanitizeHtml(html, {
-      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-        "img","table","thead","tbody","tr","th","td","h1","h2","h3","pre","code"
-      ]),
-      allowedAttributes: {
-        a: ["href", "name", "target", "rel"],
-        img: ["src", "alt", "title", "width", "height"],
-        td: ["colspan", "rowspan"],
-        th: ["colspan", "rowspan"]
-      },
-      transformTags: {
-        a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" })
-      }
-    });
+    if (wantsHtml) {
+      // Convert (model may respond with Markdown) -> HTML, then sanitize
+      const html = marked.parse(raw);
+      const safeHtml = sanitizeHtml(html, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+          "img","table","thead","tbody","tr","th","td","h1","h2","h3","pre","code"
+        ]),
+        allowedAttributes: {
+          a: ["href", "name", "target", "rel"],
+          img: ["src", "alt", "title", "width", "height"],
+          td: ["colspan", "rowspan"],
+          th: ["colspan", "rowspan"]
+        },
+        transformTags: {
+          a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" })
+        }
+      });
 
+      return res.status(200).json({
+        answer: safeHtml,
+        format: "html",
+        model: out?.model,
+        usage: out?.usage
+      });
+    }
+
+    // Default: plain text response as-is (no tags, no markdown)
     return res.status(200).json({
-      answer: safeHtml,
-      format: "html",
+      answer: raw,
+      format: "text",
       model: out?.model,
       usage: out?.usage
     });
+
   } catch (err) {
     return res.status(500).json({ error: "Server exception", detail: String(err) });
   }
