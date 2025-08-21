@@ -1,70 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>CPO OS • Sales</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="./assets/theme.css" rel="stylesheet" />
-
-  <!-- UMD globals REQUIRED for your existing React radars -->
-  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales — Competency Radars</title>
+  <link rel="stylesheet" href="assets/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Hero -->
-    <div class="hero">
-      <h1>Sales — Competency Radars</h1>
-      <p>Where we are vs where we need to be (benchmarked to top performers)</p>
+  <!-- Global Purple Header -->
+  <div class="hero">
+    <h1>Sales — Competency Radars</h1>
+    <p>Where we are vs where we need to be (benchmarked to top performers)</p>
+  </div>
+
+  <div class="wrap grid-2">
+    <!-- Left: Radars -->
+    <div class="radar-col">
+      <div class="card">
+        <h3>Product Knowledge</h3>
+        <canvas id="radarProduct"></canvas>
+      </div>
+      <div class="card">
+        <h3>Communication Skills</h3>
+        <canvas id="radarCommunication"></canvas>
+      </div>
+      <div class="card">
+        <h3>Negotiation Skills</h3>
+        <canvas id="radarNegotiation"></canvas>
+      </div>
+      <div class="card">
+        <h3>Relationship Building</h3>
+        <canvas id="radarRelationship"></canvas>
+      </div>
+      <div class="card">
+        <h3>Sales Process Mastery</h3>
+        <canvas id="radarProcess"></canvas>
+      </div>
     </div>
 
-    <!-- Top bar (kept simple) -->
-    <header>
-      <div class="brand">
-        <span class="badge">CPO OS</span>
-        <h2>Sales — Competency Radars</h2>
-        <span class="tag">Where we are vs where we need to be (benchmarked to top performers)</span>
+    <!-- Right: EnablementGPT -->
+    <div class="gpt-col card">
+      <h3>EnablementGPT <span id="gpt-status" class="status">ready</span></h3>
+      <div class="suggested">
+        <button>Which reps are below 70% in any KPI?</button>
+        <button>Who are my top 3 performers?</button>
+        <button>What’s going on with my team’s performance?</button>
+        <button>Give me 3 actions to lift win rate next month.</button>
       </div>
-      <select>
-        <option>All</option>
-      </select>
-    </header>
-
-    <!-- Global 50/50 layout -->
-    <div class="layout-2col">
-      <!-- LEFT: your existing React app renders all radars into #app -->
-      <div class="left-col">
-        <div class="radar-scale">
-          <div id="app"></div>
-        </div>
-      </div>
-
-      <!-- RIGHT: EnablementGPT (sticky) -->
-      <aside class="right-col card sticky">
-        <div class="gpt-head">
-          <h2 class="gpt-title">EnablementGPT</h2>
-          <span class="gpt-badge" id="gpt-status">ready</span>
-        </div>
-        <div id="enablement-gpt" class="gpt-body">
-          <div class="gpt-presets">
-            <button class="gpt-chip">Which reps are below 70% in any KPI?</button>
-            <button class="gpt-chip">Who are my top 3 performers?</button>
-            <button class="gpt-chip">What’s going on with my team’s performance?</button>
-            <button class="gpt-chip">Give me 3 actions to lift win rate next month.</button>
-          </div>
-          <div class="gpt-row">
-            <input id="gpt-input" class="gpt-input" placeholder="Ask a question..." />
-            <button id="gpt-btn" class="gpt-btn">Ask</button>
-          </div>
-          <div id="gpt-out" class="gpt-out"></div>
-        </div>
-      </aside>
+      <div style="margin-top:12px;"></div>
+      <form id="ask-form">
+        <input id="ask-input" placeholder="Ask a question..." />
+        <button type="submit">Ask</button>
+      </form>
+      <div id="ask-output" class="answer-box">Ask a question to see results here.</div>
     </div>
   </div>
 
-  <!-- Boot scripts (unchanged) -->
-  <script type="module" src="./app/boot/sales.js"></script>
-  <script type="module" src="./app/boot/enablement-gpt.js"></script>
+  <script src="assets/radar.js"></script>
+  <script src="assets/ask.js"></script>
 </body>
 </html>
