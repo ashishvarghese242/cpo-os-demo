@@ -113,7 +113,7 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 .layout-2col{
   display:grid;
   grid-template-columns: 1fr 1fr;
-  gap:20px;
+  gap:10px;
   align-items:start;
 }
 .left-col{ min-width:0; }
@@ -126,7 +126,7 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 }
 
 /* Sticky GPT panel */
-.sticky{ position: sticky; top: 150px; }
+.sticky{ position: sticky; top: 120px; }
 
 /* EnablementGPT helpers */
 .gpt-head{ display:flex; align-items:center; gap:8px; padding:14px 16px; border-bottom:1px solid var(--line); }
