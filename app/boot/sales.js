@@ -1,5 +1,6 @@
 // app/boot/sales.js
-// Builds Sales page radars + orange enablement points (cohort-aggregated)
+// Builds Sales page radars + optional orange enablement points (cohort-aggregated)
+// Now includes a page-level "Show training overlay" toggle (default OFF)
 
 import RadarCard from "../../components/RadarCard.js";
 
@@ -123,6 +124,7 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
 
   const [cohortType, setCohortType] = useState("All");
   const [cohortKey, setCohortKey]   = useState(regions[0] || "");
+  const [showOverlay, setShowOverlay] = useState(false); // NEW: default OFF
 
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
   const crmById   = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
@@ -178,7 +180,7 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
           React.createElement("div", { className:"tag" }, "Where we are vs where we need to be (benchmarked to top performers)")
         )
       ),
-      React.createElement("div", null,
+      React.createElement("div", { style:{display:"flex", alignItems:"center", gap:"8px"} },
         React.createElement("select", {
           value: cohortType,
           onChange: e => { setCohortType(e.target.value); if (e.target.value==="Region") setCohortKey(regions[0]||""); }
@@ -189,18 +191,27 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
         }, regions.map(r => React.createElement("option", { key:r, value:r }, r))) : null,
         cohortType==="Person" && persons.length ? React.createElement("select", {
           value: cohortKey || persons[0].id, onChange: e => setCohortKey(e.target.value)
-        }, persons.map(p => React.createElement("option", { key:p.id, value:p.id }, p.name))) : null
+        }, persons.map(p => React.createElement("option", { key:p.id, value:p.id }, p.name))) : null,
+        // NEW: overlay toggle
+        React.createElement("label", { style:{marginLeft:12, display:"inline-flex", alignItems:"center", gap:6, userSelect:"none", cursor:"pointer"} },
+          React.createElement("input", {
+            type:"checkbox",
+            checked: showOverlay,
+            onChange: e => setShowOverlay(e.target.checked)
+          }),
+          "Show training overlay"
+        )
       )
     ),
 
     React.createElement("div", { className:"grid-2", style:{marginTop:16} },
-      ...row1.map((c,i) => React.createElement(RadarCard, { key:"r1"+i, ...c, height:360 }))
+      ...row1.map((c,i) => React.createElement(RadarCard, { key:"r1"+i, ...c, height:360, showOverlay }))
     ),
     React.createElement("div", { className:"grid-2", style:{marginTop:16} },
-      ...row2.map((c,i) => React.createElement(RadarCard, { key:"r2"+i, ...c, height:360 }))
+      ...row2.map((c,i) => React.createElement(RadarCard, { key:"r2"+i, ...c, height:360, showOverlay }))
     ),
     React.createElement("div", { className:"grid-1", style:{marginTop:16} },
-      ...row3.map((c,i) => React.createElement(RadarCard, { key:"r3"+i, ...c, height:360 }))
+      ...row3.map((c,i) => React.createElement(RadarCard, { key:"r3"+i, ...c, height:360, showOverlay }))
     )
   );
 }
