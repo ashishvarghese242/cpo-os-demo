@@ -1,14 +1,16 @@
 // components/RadarCard.js
-// Supports optional enablement overlay as ORANGE POINTS via `overlayPoints` (0..5 per metric).
-// Backward-compatible with your existing props.
+// Radar card with optional orange training overlay points.
+// New props:
+//   - overlayPoints: number[] (0..5 per metric)
+//   - showOverlay: boolean (default false; when true, renders the points)
 
 export default function RadarCard({
   title,
   labels,
   targetData,
   currentData,
-  overlayData = null,      // kept for future polygon halo (unused now)
-  overlayPoints = null,    // NEW: array of 0..5, length === labels.length
+  overlayPoints = null,  // 0..5 per label (cohort coverage scaled)
+  showOverlay = false,   // NEW: page-level toggle controls visibility
   height = 360
 }) {
   const React = window.React;
@@ -44,7 +46,7 @@ export default function RadarCard({
     const actualFill = (styles.getPropertyValue("--chart-actual-fill") || "rgba(15,23,42,0.35)").trim();
     const actualLine = (styles.getPropertyValue("--chart-actual-line") || "rgba(15,23,42,1)").trim();
 
-    // Orange for training overlay (already defined in theme.css)
+    // Orange for training overlay
     const trainFill = (styles.getPropertyValue("--chart-training-fill") || "rgba(255,172,28,0.22)").trim();
     const trainLine = (styles.getPropertyValue("--chart-training-line") || "rgba(255,172,28,1)").trim();
 
@@ -72,32 +74,33 @@ export default function RadarCard({
       }
     ];
 
-    // NEW: orange point overlay (size/alpha scales with value 0..5).
-    if (Array.isArray(overlayPoints) && overlayPoints.length === labels.length) {
+    // Show orange enablement points only when toggled ON and data is present
+    if (showOverlay && Array.isArray(overlayPoints) && overlayPoints.length === labels.length) {
       const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 
-      const radii = overlayPoints.map(v => 2 + clamp(Number(v)||0, 0, 5) * 2); // 2..12
+      // Bigger & brighter mapping
+      const radii = overlayPoints.map(v => 4 + clamp(Number(v)||0, 0, 5) * 2.8); // ~4..18
       const bgColors = overlayPoints.map(v => {
         const s = clamp(Number(v)||0, 0, 5);
-        const alpha = 0.20 + (s/5)*0.60; // 0.2 .. 0.8
-        // ensure rgba(...)
+        const alpha = 0.45 + (s/5) * 0.55; // 0.45..1.00
         if (trainLine.startsWith("rgba(")) return trainLine.replace(/, *1\)$/, `, ${alpha})`);
         if (trainLine.startsWith("rgb("))  return trainLine.replace("rgb(", "rgba(").replace(/\)$/, `, ${alpha})`);
-        return trainFill; // fallback
+        // fallback to trainFill if we can't synthesize alpha
+        return trainFill;
       });
 
       datasets.push({
         label: "Enablement (Training)",
-        data: overlayPoints,                 // keep values so tooltips show 0..5
+        data: overlayPoints,                 // 0..5 so tooltips show meaningful values
         pointRadius: radii,
         pointHoverRadius: radii.map(r => r + 2),
         pointBackgroundColor: bgColors,
         pointBorderColor: trainLine,
         borderColor: trainLine,
-        borderWidth: 0,
+        borderWidth: 1.5,
         showLine: false,                     // points only
         fill: false,
-        order: 3
+        order: 999                           // draw on top of everything
       });
     }
 
@@ -127,8 +130,8 @@ export default function RadarCard({
             suggestedMin: 0, suggestedMax: 5,
             ticks: { stepSize: 1, backdropColor: "transparent", color: textColor, font: { size: 12 } },
             pointLabels: { color: textColor, font: { size: 14 } },
-            grid: { color: "rgba(2,6,23,0.08)" },
-            angleLines: { color: "rgba(2,6,23,0.12)" }
+            grid: { color: "rgba(2,6,23,0.10)" },
+            angleLines: { color: "rgba(2,6,23,0.16)" }
           }
         }
       }
@@ -137,7 +140,8 @@ export default function RadarCard({
     JSON.stringify(labels),
     JSON.stringify(targetData),
     JSON.stringify(currentData),
-    JSON.stringify(overlayPoints),  // re-render when points change
+    JSON.stringify(overlayPoints),
+    showOverlay,
     height
   ]);
 
