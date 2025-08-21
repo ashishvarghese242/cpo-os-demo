@@ -29,85 +29,75 @@ function avg(arr){
   return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
 }
 
-/* ---------- Enablement Halo helpers (kept simple + robust for demos) ---------- */
-
-function topPerformerIds(crm, percentile = 0.75){
-  const arr = Array.isArray(crm) ? crm.slice() : [];
-  if (!arr.length) return new Set();
-
-  const key =
-    (arr.some(r => typeof r.win_rate_uplift === "number") && "win_rate_uplift") ||
-    (arr.some(r => typeof r.margin_retention === "number") && "margin_retention") ||
-    (arr.some(r => typeof r.client_retention === "number") && "client_retention") ||
-    null;
-
-  if (!key) return new Set();
-  arr.sort((a,b) => (b[key]??-Infinity) - (a[key]??-Infinity));
-  const cutoff = Math.max(1, Math.floor(arr.length * (1 - percentile)) + 1);
-  const top = arr.slice(0, cutoff);
-  return new Set(top.map(r => r.person_id).filter(Boolean));
-}
-
-const normCompKey = (name)=>String(name||"").toLowerCase().trim();
+/* ---------- Training mapping helpers (robust to schema variants) ---------- */
+const lc = (s)=>String(s||"").toLowerCase().trim();
 const getContentId = (x)=> x?.content_id ?? x?.contentId ?? x?.id ?? x?.content ?? null;
-function getCompetencyTags(item){
-  const tags = item?.competencies ?? item?.tags ?? item?.labels ?? [];
-  return Array.isArray(tags) ? tags.map(t=>String(t||"").toLowerCase().trim()).filter(Boolean) : [];
+
+function getArray(x){
+  if (!x) return [];
+  if (Array.isArray(x)) return x;
+  return [x];
 }
+function getTagsLike(item){
+  const raw = getArray(item?.metrics ?? item?.tags ?? item?.labels ?? item?.keywords ?? []);
+  return raw.map(lc).filter(Boolean);
+}
+function getCompetencies(item){
+  return getArray(item?.competencies ?? item?.domains ?? item?.areas ?? [])
+    .map(lc).filter(Boolean);
+}
+
 function isConsumed(row){
-  const status = (row?.status || row?.state || "").toString().toLowerCase();
+  const status = lc(row?.status || row?.state);
   const progress = Number(row?.progress ?? row?.completion ?? 0);
   const minutes  = Number(row?.minutes ?? row?.duration_min ?? row?.duration ?? 0);
   return status === "completed" || status === "passed" || progress >= 1 || minutes > 0;
 }
 
-/** Returns:
- *  - haloPctByComp: Map<comp(lower), pct 0..1> based on TOP performers with tagged content
- *  - overallTopPct: single pct 0..1 of TOP performers who consumed any content (fallback)
+/**
+ * For one metric, find related content IDs:
+ *   1) catalog.metrics includes metricId   (best)
+ *   2) catalog.tags/labels include metricId
+ *   3) fallback: items tagged with the competency name only
  */
-function buildHalo({ lrs, catalog, topIds }){
-  const haloPctByComp = new Map();
-  if (!(topIds instanceof Set)) return { haloPctByComp, overallTopPct: 0 };
+function relatedContentForMetric(catalog, metricIdLC, compLC){
+  const ids = new Set();
 
-  const topOnly = Array.isArray(lrs) ? lrs.filter(r=>{
-    const pid = r?.person_id || r?.user_id || r?.learner_id || null;
-    return pid && topIds.has(pid) && isConsumed(r);
-  }) : [];
+  for (const row of catalog){
+    const cid = getContentId(row);
+    if (!cid) continue;
+    const tags = getTagsLike(row);
+    const comps = getCompetencies(row);
 
-  const denom = Math.max(1, topIds.size);
-  const overallTopConsumers = new Set(topOnly.map(r => r?.person_id || r?.user_id || r?.learner_id).filter(Boolean));
-  const overallTopPct = clamp(overallTopConsumers.size / denom, 0, 1);
+    if (tags.includes(metricIdLC)) { ids.add(String(cid)); continue; }
+    if (comps.includes(compLC) && tags.length === 0) { ids.add(String(cid)); continue; }
+  }
 
-  // Map content_id -> competencies
-  const contentToComps = new Map();
-  if (Array.isArray(catalog)) {
+  // If still empty, allow competency-only items even if tags exist
+  if (ids.size === 0){
     for (const row of catalog){
       const cid = getContentId(row);
       if (!cid) continue;
-      const tags = getCompetencyTags(row);
-      if (!tags.length) continue;
-      contentToComps.set(String(cid), new Set(tags));
+      const comps = getCompetencies(row);
+      if (comps.includes(compLC)) ids.add(String(cid));
     }
   }
 
-  // comp -> unique TOP consumers
-  const compToConsumers = new Map();
-  for (const rec of topOnly){
-    const cid = getContentId(rec);
-    if (!cid) continue;
-    const comps = contentToComps.get(String(cid));
-    if (!comps || !comps.size) continue;
-    const pid = rec?.person_id || rec?.user_id || rec?.learner_id;
-    for (const comp of comps){
-      if (!compToConsumers.has(comp)) compToConsumers.set(comp, new Set());
-      compToConsumers.get(comp).add(pid);
-    }
-  }
-  for (const [comp,set] of compToConsumers.entries()){
-    haloPctByComp.set(comp, clamp(set.size / denom, 0, 1));
-  }
+  return Array.from(ids);
+}
 
-  return { haloPctByComp, overallTopPct };
+/** Build a quick lookup: person_id -> Set(consumed content_id) */
+function buildConsumedByPerson(lrs){
+  const m = new Map();
+  for (const r of (Array.isArray(lrs) ? lrs : [])){
+    const pid = r?.person_id || r?.user_id || r?.learner_id;
+    const cid = getContentId(r);
+    if (!pid || !cid) continue;
+    if (!isConsumed(r)) continue;
+    if (!m.has(pid)) m.set(pid, new Set());
+    m.get(pid).add(String(cid));
+  }
+  return m;
 }
 
 /* ----------------------------- React Page ----------------------------- */
@@ -124,37 +114,46 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
 
   const crmById = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
-  const topIds = useMemo(() => topPerformerIds(crm, 0.75), [crm]);
 
-  const { haloPctByComp, overallTopPct } = useMemo(() => buildHalo({
-    lrs: Array.isArray(lrs) ? lrs : [],
-    catalog: Array.isArray(catalog) ? catalog : [],
-    topIds
-  }), [lrs, catalog, topIds]);
+  const consumedByPerson = useMemo(() => buildConsumedByPerson(lrs), [lrs]);
 
   const cards = useMemo(() => {
     return cfg.map(block => {
+      const compName = block.competency;
+      const compLC = lc(compName);
       const labels = block.metrics.map(m => m.label);
       const targetData = block.metrics.map(() => 5);
 
+      // Radar "Current"
       const currentData = block.metrics.map(m => {
         const vals = personIds.map(pid => crmById.get(pid)?.[m.id]).filter(v => v!=null);
         const raw = avg(vals);
         return norm(raw, m.floor, m.target, m.higher_is_better !== false);
       });
 
-      // HALO: prefer competency-specific; else fall back to overall; else show a small demo value
-      const compKey = normCompKey(block.competency);
-      let pct = haloPctByComp.get(compKey);
-      if (pct == null) pct = overallTopPct;               // fallback to any content
-      if (!pct && (lrs?.length ?? 0) === 0) pct = 0.25;   // last-resort demo default if no LRS
+      // NEW: per-metric training coverage (cohort-aggregated)
+      const overlayPoints = block.metrics.map(m => {
+        const metricIdLC = lc(m.id);
+        const related = relatedContentForMetric(catalog, metricIdLC, compLC); // list of content IDs
+        const denom = related.length;
+        if (denom === 0) return 0; // nothing linked → no points
 
-      const haloScaled = clamp(pct * 5, 0, 5);
-      const overlayData = labels.map(() => haloScaled);
+        // each person: (# related consumed) / denom
+        const personScores = personIds.map(pid => {
+          const set = consumedByPerson.get(pid);
+          if (!set) return 0;
+          let cnt = 0;
+          for (const cid of related) if (set.has(cid)) cnt++;
+          return cnt / denom;
+        });
 
-      return { title: block.competency, labels, targetData, currentData, overlayData };
+        const cohortPct = avg(personScores);   // 0..1
+        return clamp(cohortPct * 5, 0, 5);     // 0..5 for point size/intensity
+      });
+
+      return { title: compName, labels, targetData, currentData, overlayPoints };
     });
-  }, [cfg, crmById, JSON.stringify(personIds), haloPctByComp, overallTopPct, lrs?.length]);
+  }, [cfg, catalog, consumedByPerson, crmById, JSON.stringify(personIds)]);
 
   const row1 = cards.slice(0,2);
   const row2 = cards.slice(2,4);
