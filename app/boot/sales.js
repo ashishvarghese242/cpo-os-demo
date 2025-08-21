@@ -29,9 +29,8 @@ function avg(arr){
   return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
 }
 
-/* ----------------------- Enablement Halo Helpers (non-breaking) ----------------------- */
+/* ---------- Enablement Halo helpers (kept simple + robust for demos) ---------- */
 
-/** Top performers = top 25% by win_rate_uplift (fallbacks if missing). */
 function topPerformerIds(crm, percentile = 0.75){
   const arr = Array.isArray(crm) ? crm.slice() : [];
   if (!arr.length) return new Set();
@@ -43,82 +42,75 @@ function topPerformerIds(crm, percentile = 0.75){
     null;
 
   if (!key) return new Set();
-
   arr.sort((a,b) => (b[key]??-Infinity) - (a[key]??-Infinity));
   const cutoff = Math.max(1, Math.floor(arr.length * (1 - percentile)) + 1);
   const top = arr.slice(0, cutoff);
   return new Set(top.map(r => r.person_id).filter(Boolean));
 }
 
-/** Normalize competency name for lookup. */
-function normCompKey(name){ return String(name || "").toLowerCase().trim(); }
-
-/** Extract content_id from various shapes. */
-function getContentId(item){
-  return item?.content_id ?? item?.contentId ?? item?.id ?? item?.content ?? null;
-}
-
-/** Extract competency tags from catalog items. */
+const normCompKey = (name)=>String(name||"").toLowerCase().trim();
+const getContentId = (x)=> x?.content_id ?? x?.contentId ?? x?.id ?? x?.content ?? null;
 function getCompetencyTags(item){
   const tags = item?.competencies ?? item?.tags ?? item?.labels ?? [];
-  if (!Array.isArray(tags)) return [];
-  return tags.map(t => String(t || "").toLowerCase().trim()).filter(Boolean);
+  return Array.isArray(tags) ? tags.map(t=>String(t||"").toLowerCase().trim()).filter(Boolean) : [];
 }
-
-/** Simple “consumed” rule for demo: completed/passed OR progress>=1 OR minutes>0 */
-function isConsumed(lrsRow){
-  const status = (lrsRow?.status || lrsRow?.state || "").toString().toLowerCase();
-  const progress = Number(lrsRow?.progress ?? lrsRow?.completion ?? 0);
-  const minutes = Number(lrsRow?.minutes ?? lrsRow?.duration_min ?? lrsRow?.duration ?? 0);
+function isConsumed(row){
+  const status = (row?.status || row?.state || "").toString().toLowerCase();
+  const progress = Number(row?.progress ?? row?.completion ?? 0);
+  const minutes  = Number(row?.minutes ?? row?.duration_min ?? row?.duration ?? 0);
   return status === "completed" || status === "passed" || progress >= 1 || minutes > 0;
 }
 
-/**
- * Compute: competency(lower) -> % (0..1) of TOP performers who consumed any related content.
- * lrs: [{ person_id, content_id, status/progress/minutes }]
- * catalog: [{ content_id/id, competencies/tags: [...] }]
+/** Returns:
+ *  - haloPctByComp: Map<comp(lower), pct 0..1> based on TOP performers with tagged content
+ *  - overallTopPct: single pct 0..1 of TOP performers who consumed any content (fallback)
  */
-function computeHaloPercentByCompetency({ lrs, catalog, topIds }){
-  const result = new Map();
-  if (!Array.isArray(lrs) || !Array.isArray(catalog) || !(topIds instanceof Set)) return result;
+function buildHalo({ lrs, catalog, topIds }){
+  const haloPctByComp = new Map();
+  if (!(topIds instanceof Set)) return { haloPctByComp, overallTopPct: 0 };
+
+  const topOnly = Array.isArray(lrs) ? lrs.filter(r=>{
+    const pid = r?.person_id || r?.user_id || r?.learner_id || null;
+    return pid && topIds.has(pid) && isConsumed(r);
+  }) : [];
+
+  const denom = Math.max(1, topIds.size);
+  const overallTopConsumers = new Set(topOnly.map(r => r?.person_id || r?.user_id || r?.learner_id).filter(Boolean));
+  const overallTopPct = clamp(overallTopConsumers.size / denom, 0, 1);
 
   // Map content_id -> competencies
   const contentToComps = new Map();
-  for (const row of catalog){
-    const cid = getContentId(row);
-    if (!cid) continue;
-    const tags = getCompetencyTags(row);
-    if (!tags.length) continue;
-    contentToComps.set(String(cid), new Set(tags));
+  if (Array.isArray(catalog)) {
+    for (const row of catalog){
+      const cid = getContentId(row);
+      if (!cid) continue;
+      const tags = getCompetencyTags(row);
+      if (!tags.length) continue;
+      contentToComps.set(String(cid), new Set(tags));
+    }
   }
 
-  // comp -> Set(person_id) among TOP only
+  // comp -> unique TOP consumers
   const compToConsumers = new Map();
-  for (const rec of lrs){
-    const pid = rec?.person_id || rec?.user_id || rec?.learner_id || null;
-    if (!pid || !topIds.has(pid)) continue;
-    if (!isConsumed(rec)) continue;
-
+  for (const rec of topOnly){
     const cid = getContentId(rec);
     if (!cid) continue;
-
     const comps = contentToComps.get(String(cid));
     if (!comps || !comps.size) continue;
-
+    const pid = rec?.person_id || rec?.user_id || rec?.learner_id;
     for (const comp of comps){
       if (!compToConsumers.has(comp)) compToConsumers.set(comp, new Set());
       compToConsumers.get(comp).add(pid);
     }
   }
-
-  const denom = Math.max(1, topIds.size);
-  for (const [comp, set] of compToConsumers.entries()){
-    result.set(comp, clamp(set.size / denom, 0, 1));
+  for (const [comp,set] of compToConsumers.entries()){
+    haloPctByComp.set(comp, clamp(set.size / denom, 0, 1));
   }
-  return result;
+
+  return { haloPctByComp, overallTopPct };
 }
 
-/* ----------------------- React Page ----------------------- */
+/* ----------------------------- React Page ----------------------------- */
 
 function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   const { useMemo, useState } = React;
@@ -131,12 +123,10 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
 
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
 
-  // Lookups
   const crmById = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
   const topIds = useMemo(() => topPerformerIds(crm, 0.75), [crm]);
 
-  // Enablement halo % per competency (TOP performers only)
-  const haloPctByComp = useMemo(() => computeHaloPercentByCompetency({
+  const { haloPctByComp, overallTopPct } = useMemo(() => buildHalo({
     lrs: Array.isArray(lrs) ? lrs : [],
     catalog: Array.isArray(catalog) ? catalog : [],
     topIds
@@ -146,28 +136,31 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
     return cfg.map(block => {
       const labels = block.metrics.map(m => m.label);
       const targetData = block.metrics.map(() => 5);
+
       const currentData = block.metrics.map(m => {
         const vals = personIds.map(pid => crmById.get(pid)?.[m.id]).filter(v => v!=null);
         const raw = avg(vals);
         return norm(raw, m.floor, m.target, m.higher_is_better !== false);
       });
 
-      // Halo overlay: % of top performers consuming related content → 0..5
+      // HALO: prefer competency-specific; else fall back to overall; else show a small demo value
       const compKey = normCompKey(block.competency);
-      const pct = haloPctByComp.get(compKey) ?? 0;   // 0..1
-      const haloScaled = clamp(pct * 5, 0, 5);       // 0..5 for radar
+      let pct = haloPctByComp.get(compKey);
+      if (pct == null) pct = overallTopPct;               // fallback to any content
+      if (!pct && (lrs?.length ?? 0) === 0) pct = 0.25;   // last-resort demo default if no LRS
+
+      const haloScaled = clamp(pct * 5, 0, 5);
       const overlayData = labels.map(() => haloScaled);
 
       return { title: block.competency, labels, targetData, currentData, overlayData };
     });
-  }, [cfg, crmById, JSON.stringify(personIds), haloPctByComp]);
+  }, [cfg, crmById, JSON.stringify(personIds), haloPctByComp, overallTopPct, lrs?.length]);
 
   const row1 = cards.slice(0,2);
   const row2 = cards.slice(2,4);
   const row3 = cards.slice(4,5);
 
   return React.createElement(React.Fragment, null,
-    // Keep your existing header/filters exactly as-is
     React.createElement("header", null,
       React.createElement("div", { className:"brand" },
         React.createElement("div", null,
@@ -208,9 +201,8 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
       json("./config/competencies/sales.json"),
       json("./data/hris.json"),
       json("./data/crm.json"),
-      // Optional sources; tolerate 404s and keep page working
-      fetch("./data/lrs.json").then(r => r.ok ? r.json() : []).catch(() => []),
-      fetch("./data/content_catalog.json").then(r => r.ok ? r.json() : []).catch(() => [])
+      fetch("./data/lrs.json").then(r => r.ok ? r.json() : []).catch(()=>[]),
+      fetch("./data/content_catalog.json").then(r => r.ok ? r.json() : []).catch(()=>[])
     ]);
     const root = document.getElementById("app");
     ReactDOM.createRoot(root).render(
