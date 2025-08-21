@@ -1,13 +1,14 @@
 // components/RadarCard.js
-// Backward-compatible: adds optional "overlayData" to render an enablement halo.
-// If overlayData is omitted, the chart renders exactly as before.
+// Supports optional enablement overlay as ORANGE POINTS via `overlayPoints` (0..5 per metric).
+// Backward-compatible with your existing props.
 
 export default function RadarCard({
   title,
   labels,
   targetData,
   currentData,
-  overlayData = null,  // NEW (optional)
+  overlayData = null,      // kept for future polygon halo (unused now)
+  overlayPoints = null,    // NEW: array of 0..5, length === labels.length
   height = 360
 }) {
   const React = window.React;
@@ -16,22 +17,24 @@ export default function RadarCard({
 
   function wrapLabel(s, max = 16){
     if (!s) return s;
-    const parts = [];
+    const out = [];
     let buf = "";
-    s.split(" ").forEach(word => {
-      if ((buf + " " + word).trim().length > max){
-        parts.push(buf.trim());
-        buf = word;
+    s.split(" ").forEach(w => {
+      const tryStr = (buf ? buf + " " : "") + w;
+      if (tryStr.length > max){
+        if (buf) out.push(buf);
+        buf = w;
       } else {
-        buf = (buf ? buf + " " : "") + word;
+        buf = tryStr;
       }
     });
-    if (buf) parts.push(buf);
-    return parts.join("\n");
+    if (buf) out.push(buf);
+    return out.join("\n");
   }
 
   useEffect(() => {
     if (!ref.current) return;
+
     const ctx = ref.current.getContext("2d");
     if (ref.current.__chart) { ref.current.__chart.destroy(); ref.current.__chart = null; }
 
@@ -40,34 +43,63 @@ export default function RadarCard({
     const targetLine = (styles.getPropertyValue("--chart-target-line") || "rgba(106,0,255,1)").trim();
     const actualFill = (styles.getPropertyValue("--chart-actual-fill") || "rgba(15,23,42,0.35)").trim();
     const actualLine = (styles.getPropertyValue("--chart-actual-line") || "rgba(15,23,42,1)").trim();
-    const haloFill   = (styles.getPropertyValue("--chart-influence-fill") || "rgba(0,209,255,0.20)").trim(); // NEW
-    const haloLine   = (styles.getPropertyValue("--chart-influence-line") || "rgba(0,209,255,1)").trim();     // NEW
-    const textColor  = (styles.getPropertyValue("--text") || "#0f172a").trim();
 
+    // Orange for training overlay (already defined in theme.css)
+    const trainFill = (styles.getPropertyValue("--chart-training-fill") || "rgba(255,172,28,0.22)").trim();
+    const trainLine = (styles.getPropertyValue("--chart-training-line") || "rgba(255,172,28,1)").trim();
+
+    const textColor = (styles.getPropertyValue("--text") || "#0f172a").trim();
     const wrapped = labels.map(l => wrapLabel(l, 18));
 
-    // Build datasets in draw order: Target (line), optional Halo (fill), Current (fill)
     const datasets = [
-      { label: "Target (IRP)", data: targetData, backgroundColor: targetFill, borderColor: targetLine, borderWidth: 2, pointRadius: 3, order: 1 }
+      {
+        label: "Target (IRP)",
+        data: targetData,
+        backgroundColor: targetFill,
+        borderColor: targetLine,
+        borderWidth: 2,
+        pointRadius: 3,
+        order: 1
+      },
+      {
+        label: "Current",
+        data: currentData,
+        backgroundColor: actualFill,
+        borderColor: actualLine,
+        borderWidth: 2,
+        pointRadius: 3,
+        order: 2
+      }
     ];
 
-    if (Array.isArray(overlayData) && overlayData.length === labels.length) {
+    // NEW: orange point overlay (size/alpha scales with value 0..5).
+    if (Array.isArray(overlayPoints) && overlayPoints.length === labels.length) {
+      const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+
+      const radii = overlayPoints.map(v => 2 + clamp(Number(v)||0, 0, 5) * 2); // 2..12
+      const bgColors = overlayPoints.map(v => {
+        const s = clamp(Number(v)||0, 0, 5);
+        const alpha = 0.20 + (s/5)*0.60; // 0.2 .. 0.8
+        // ensure rgba(...)
+        if (trainLine.startsWith("rgba(")) return trainLine.replace(/, *1\)$/, `, ${alpha})`);
+        if (trainLine.startsWith("rgb("))  return trainLine.replace("rgb(", "rgba(").replace(/\)$/, `, ${alpha})`);
+        return trainFill; // fallback
+      });
+
       datasets.push({
-        label: "Enablement (Top Performers)", // legend label
-        data: overlayData,
-        backgroundColor: haloFill,
-        borderColor: haloLine,
-        borderWidth: 1,
-        pointRadius: 0,
-        fill: true,
-        order: 0,           // render beneath "Current"
-        tension: 0.2
+        label: "Enablement (Training)",
+        data: overlayPoints,                 // keep values so tooltips show 0..5
+        pointRadius: radii,
+        pointHoverRadius: radii.map(r => r + 2),
+        pointBackgroundColor: bgColors,
+        pointBorderColor: trainLine,
+        borderColor: trainLine,
+        borderWidth: 0,
+        showLine: false,                     // points only
+        fill: false,
+        order: 3
       });
     }
-
-    datasets.push(
-      { label: "Current", data: currentData, backgroundColor: actualFill, borderColor: actualLine, borderWidth: 2, pointRadius: 3, order: 2 }
-    );
 
     ref.current.__chart = new window.Chart(ctx, {
       type: "radar",
@@ -83,8 +115,8 @@ export default function RadarCard({
             titleFont: { size: 13 },
             callbacks: {
               label: (ctx) => {
-                const v = (ctx.parsed?.r ?? 0).toFixed(2);
-                return `${ctx.dataset.label}: ${v} / 5`;
+                const v = (ctx.parsed?.r ?? 0);
+                return `${ctx.dataset.label}: ${v.toFixed(2)} / 5`;
               }
             }
           }
@@ -105,7 +137,8 @@ export default function RadarCard({
     JSON.stringify(labels),
     JSON.stringify(targetData),
     JSON.stringify(currentData),
-    JSON.stringify(overlayData) // NEW: re-render when halo changes
+    JSON.stringify(overlayPoints),  // re-render when points change
+    height
   ]);
 
   return window.React.createElement("div", { className: "card" },
