@@ -51,6 +51,9 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 
 .topbar{
   width:100%;
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* keeps it above other content */
   background: linear-gradient(135deg, #1d2b64 0%, #8f6ed5 50%, #00d1ff 100%);
   color:#fff;
   box-shadow: var(--shadow);
