@@ -1,15 +1,22 @@
 // app/boot/sales.js
+// Builds Sales page radars + orange enablement points (cohort-aggregated)
+
 import RadarCard from "../../components/RadarCard.js";
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
 
+/* -------------------------- utilities -------------------------- */
 async function json(path){
   const r = await fetch(path, { cache:"no-store" });
   if(!r.ok) throw new Error(`${path} ${r.status}`);
   return r.json();
 }
 const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+function avg(arr){
+  const a = arr.filter(x=>typeof x==="number" && !isNaN(x));
+  return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
+}
 function norm(val, floor, target, higher=true){
   if (val==null || isNaN(val)) return 0;
   const a = Math.min(target, Math.max(floor, val));
@@ -17,76 +24,44 @@ function norm(val, floor, target, higher=true){
   const score = clamp(scaled * 5, 0, 5);
   return higher ? score : (5 - score);
 }
+function lc(s){ return String(s ?? "").toLowerCase().trim(); }
+function getArray(x){ return !x ? [] : (Array.isArray(x) ? x : [x]); }
+const getContentId = (x)=> x?.content_id ?? x?.contentId ?? x?.id ?? x?.content ?? null;
+
+/* --------------------- cohort/person slicing ------------------- */
 function slicePeople(hris, cohortType, cohortKey){
   const sales = hris.filter(p => p.org_unit === "Sales");
-  if (cohortType === "All") return sales.map(p=>p.person_id);
+  if (cohortType === "All")    return sales.map(p=>p.person_id);
   if (cohortType === "Region") return sales.filter(p => p.region === cohortKey).map(p=>p.person_id);
   if (cohortType === "Person") return cohortKey ? [cohortKey] : [];
   return sales.map(p=>p.person_id);
 }
-function avg(arr){
-  const a = arr.filter(x=>typeof x==="number" && !isNaN(x));
-  return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
-}
 
-/* ---------- Training mapping helpers (robust to schema variants) ---------- */
-const lc = (s)=>String(s||"").toLowerCase().trim();
-const getContentId = (x)=> x?.content_id ?? x?.contentId ?? x?.id ?? x?.content ?? null;
-
-function getArray(x){
-  if (!x) return [];
-  if (Array.isArray(x)) return x;
-  return [x];
-}
+/* --------------------- catalog/LRS mappers --------------------- */
+// Catalog: accept your schema (related_metric, competency) + common alternates.
 function getTagsLike(item){
-  const raw = getArray(item?.metrics ?? item?.tags ?? item?.labels ?? item?.keywords ?? []);
-  return raw.map(lc).filter(Boolean);
+  const raw = [
+    ...(getArray(item?.metrics)),   // optional alt
+    ...(getArray(item?.tags)),      // optional alt
+    ...(getArray(item?.labels)),    // optional alt
+    item?.related_metric            // YOUR field
+  ].filter(Boolean);
+  return raw.map(lc);
 }
 function getCompetencies(item){
-  return getArray(item?.competencies ?? item?.domains ?? item?.areas ?? [])
-    .map(lc).filter(Boolean);
+  const raw = [
+    ...(getArray(item?.competencies)), // optional alt
+    item?.competency                   // YOUR field
+  ].filter(Boolean);
+  return raw.map(lc);
 }
-
+// LRS: treat completion/progress/minutes as consumption
 function isConsumed(row){
-  const status = lc(row?.status || row?.state);
+  const status = lc(row?.status || row?.state || (row?.completion ? "completed" : ""));
   const progress = Number(row?.progress ?? row?.completion ?? 0);
   const minutes  = Number(row?.minutes ?? row?.duration_min ?? row?.duration ?? 0);
   return status === "completed" || status === "passed" || progress >= 1 || minutes > 0;
 }
-
-/**
- * For one metric, find related content IDs:
- *   1) catalog.metrics includes metricId   (best)
- *   2) catalog.tags/labels include metricId
- *   3) fallback: items tagged with the competency name only
- */
-function relatedContentForMetric(catalog, metricIdLC, compLC){
-  const ids = new Set();
-
-  for (const row of catalog){
-    const cid = getContentId(row);
-    if (!cid) continue;
-    const tags = getTagsLike(row);
-    const comps = getCompetencies(row);
-
-    if (tags.includes(metricIdLC)) { ids.add(String(cid)); continue; }
-    if (comps.includes(compLC) && tags.length === 0) { ids.add(String(cid)); continue; }
-  }
-
-  // If still empty, allow competency-only items even if tags exist
-  if (ids.size === 0){
-    for (const row of catalog){
-      const cid = getContentId(row);
-      if (!cid) continue;
-      const comps = getCompetencies(row);
-      if (comps.includes(compLC)) ids.add(String(cid));
-    }
-  }
-
-  return Array.from(ids);
-}
-
-/** Build a quick lookup: person_id -> Set(consumed content_id) */
 function buildConsumedByPerson(lrs){
   const m = new Map();
   for (const r of (Array.isArray(lrs) ? lrs : [])){
@@ -100,8 +75,46 @@ function buildConsumedByPerson(lrs){
   return m;
 }
 
-/* ----------------------------- React Page ----------------------------- */
+// Metric id leniency (e.g., demo_accuracy_rate ↔ demo_accuracy)
+function metricAliases(metricIdLC){
+  const a = new Set([metricIdLC]);
+  if (metricIdLC.endsWith("_rate")) a.add(metricIdLC.replace(/_rate$/, ""));
+  if (metricIdLC.endsWith("_days")) a.add(metricIdLC.replace(/_days$/, ""));
+  const map = {
+    "demo_accuracy_rate": "demo_accuracy",
+    "customer_sentiment_score": "sentiment",
+    "sales_stage_velocity": "stage_velocity_days"
+  };
+  if (map[metricIdLC]) a.add(map[metricIdLC]);
+  return a;
+}
 
+// Find content IDs related to a metric (prefer metric tag; fallback to competency)
+function relatedContentForMetric(catalog, metricIdLC, compLC){
+  const ids = new Set();
+  const aliases = metricAliases(metricIdLC);
+
+  for (const row of (Array.isArray(catalog) ? catalog : [])){
+    const cid = getContentId(row);
+    if (!cid) continue;
+    const tags  = getTagsLike(row);
+    const comps = getCompetencies(row);
+
+    if (tags.some(t => aliases.has(t))) { ids.add(String(cid)); continue; }
+    if (comps.includes(compLC) && tags.length === 0) { ids.add(String(cid)); continue; }
+  }
+  if (ids.size === 0){
+    for (const row of (Array.isArray(catalog) ? catalog : [])){
+      const cid = getContentId(row);
+      if (!cid) continue;
+      const comps = getCompetencies(row);
+      if (comps.includes(compLC)) ids.add(String(cid));
+    }
+  }
+  return Array.from(ids);
+}
+
+/* --------------------------- React page ------------------------ */
 function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   const { useMemo, useState } = React;
 
@@ -109,42 +122,40 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   const persons = hris.filter(p=>p.org_unit==="Sales").map(p=>({id:p.person_id, name:p.name||p.person_id}));
 
   const [cohortType, setCohortType] = useState("All");
-  const [cohortKey, setCohortKey] = useState(regions[0] || "");
+  const [cohortKey, setCohortKey]   = useState(regions[0] || "");
 
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
-
-  const crmById = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
-
+  const crmById   = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
   const consumedByPerson = useMemo(() => buildConsumedByPerson(lrs), [lrs]);
 
   const cards = useMemo(() => {
     return cfg.map(block => {
       const compName = block.competency;
-      const compLC = lc(compName);
+      const compLC   = lc(compName);
+
       const labels = block.metrics.map(m => m.label);
       const targetData = block.metrics.map(() => 5);
 
-      // Radar "Current"
+      // current (KPI normalized to 0..5)
       const currentData = block.metrics.map(m => {
         const vals = personIds.map(pid => crmById.get(pid)?.[m.id]).filter(v => v!=null);
-        const raw = avg(vals);
+        const raw  = avg(vals);
         return norm(raw, m.floor, m.target, m.higher_is_better !== false);
       });
 
-      // NEW: per-metric training coverage (cohort-aggregated)
+      // enablement points (cohort-aggregated coverage 0..1 → 0..5)
       const overlayPoints = block.metrics.map(m => {
         const metricIdLC = lc(m.id);
-        const related = relatedContentForMetric(catalog, metricIdLC, compLC); // list of content IDs
+        const related = relatedContentForMetric(catalog, metricIdLC, compLC);
         const denom = related.length;
-        if (denom === 0) return 0; // nothing linked → no points
+        if (denom === 0) return 0;
 
-        // each person: (# related consumed) / denom
         const personScores = personIds.map(pid => {
           const set = consumedByPerson.get(pid);
           if (!set) return 0;
           let cnt = 0;
           for (const cid of related) if (set.has(cid)) cnt++;
-          return cnt / denom;
+          return cnt / denom; // 0..1 for this person
         });
 
         const cohortPct = avg(personScores);   // 0..1
@@ -194,6 +205,7 @@ function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   );
 }
 
+/* ---------------------------- bootstrap ------------------------ */
 (async function bootstrap(){
   try{
     const [cfg, hris, crm, lrs, catalog] = await Promise.all([
