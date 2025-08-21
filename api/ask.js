@@ -69,7 +69,7 @@ MATH & CITATIONS
 
 OUTPUT STYLE
 ${wantsHtml
-  ? "- Output **valid semantic HTML only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers."
+  ? "- Output **valid semantic Rich Text Only** (no Markdown). Use headings, lists, tables as needed. Do not include <html> or <body> wrappers."
   : `- Output in **plain text only**. 
 - Do not use HTML or Markdown formatting. 
 - Use ALL CAPS or underlines for section titles (e.g., "EXECUTIVE SUMMARY" or "Executive Summary\n----------------").
