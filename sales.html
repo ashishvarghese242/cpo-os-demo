@@ -6,41 +6,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="./assets/theme.css" rel="stylesheet" />
 
-  <!-- Keep these UMD globals: your radars depend on them -->
+  <!-- UMD globals needed by your existing radars -->
   <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
 </head>
 <body>
-  <!-- Single (purple) header only -->
-  <div class="hero">
-    <h1>Sales — Competency Radars</h1>
-    <p>Where we are vs where we need to be (benchmarked to top performers)</p>
+
+  <!-- Global Top Bar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="./assets/img/cpo-logo.png" alt="Chief Productivity Officer logo">
+        <div>
+          <p class="brand-title">Productivity OS</p>
+          <p class="brand-sub">Strengthen the competencies that move outcomes</p>
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <a class="tab" href="./index.html">Home</a>
+        <a class="tab active" href="./sales.html">Sales</a>
+        <a class="tab" aria-disabled="true">Customer Success</a>
+        <a class="tab" aria-disabled="true">Production / Engineering</a>
+      </nav>
+    </div>
   </div>
 
   <div class="wrap">
     <!-- 50/50 layout: radars left, GPT right -->
     <div class="layout-2col">
-      <!-- LEFT: your existing React app renders all radars into #app -->
+      <!-- LEFT: your React radars render into #app -->
       <div class="left-col">
         <div class="radar-scale">
           <div id="app"></div>
         </div>
       </div>
 
-      <!-- RIGHT: EnablementGPT (sticky sidebar) -->
+      <!-- RIGHT: EnablementGPT (sticky) -->
       <aside class="right-col card sticky">
         <div class="gpt-head">
           <h2 class="gpt-title">EnablementGPT</h2>
           <span class="gpt-badge" id="gpt-status">ready</span>
         </div>
-        <!-- The card UI is rendered by app/boot/enablement-gpt.js -->
         <div id="enablement-gpt" class="gpt-body"></div>
       </aside>
     </div>
   </div>
 
-  <!-- Your existing boots (unchanged) -->
+  <!-- Boot scripts -->
   <script type="module" src="./app/boot/sales.js"></script>
   <script type="module" src="./app/boot/enablement-gpt.js"></script>
 </body>
