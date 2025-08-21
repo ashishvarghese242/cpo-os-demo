@@ -20,10 +20,6 @@
   --chart-influence-fill: rgba(0, 209, 255, 0.20);
   --chart-influence-line: rgba(0, 209, 255, 1);
 
-  /* Training overlay (high contrast) */
-  --chart-training-fill: rgba(255, 172, 28, 0.22);
-  --chart-training-line: rgba(255, 172, 28, 1);
-
   /* UI */
   --radius: 16px;
   --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
@@ -46,110 +42,90 @@ body{
   box-shadow: var(--shadow);
 }
 
-header{
-  display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;
-}
-
-.brand { display:flex; gap:12px; align-items:center; }
-.brand h2{ margin:0; font-size:22px; }
-.brand .tag{ color: var(--muted); font-size:12px }
-
-select, button{
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 8px 10px;
-  background: #fff;
-}
-
-.badge{
-  display:inline-flex; gap:8px; align-items:center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color:#fff; font-weight:700; padding:8px 12px; border-radius: 999px;
-}
-
-.hero {
-  border-radius: var(--radius);
-  background: radial-gradient(1200px 400px at 20% -20%, rgba(106,0,255,0.25), transparent),
-              radial-gradient(1200px 400px at 80% -30%, rgba(0,209,255,0.20), transparent),
-              #0B1020;
-  color: #fff;
-  padding: 18px 16px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow);
-}
-.hero h1 { margin: 0; font-size: 20px; }
-.hero p  { margin: 6px 0 0 0; color: rgba(255,255,255,0.8); font-size: 13px; }
-
 table th, table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
 table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 
-/* ===== Layout helpers ===== */
-.grid-3{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-@media (max-width: 1100px){
-  .grid-3{ grid-template-columns: 1fr; }
-}
+/* ========================================================= */
+/* ===================== Global Top Bar ==================== */
+/* ========================================================= */
 
-/* ===== ROI Banner ===== */
-.roi-banner{
-  border-radius: var(--radius);
-  background: #ffffff;
-  border: 1px solid var(--line);
+.topbar{
+  width:100%;
+  background: linear-gradient(135deg, #1d2b64 0%, #8f6ed5 50%, #00d1ff 100%);
+  color:#fff;
   box-shadow: var(--shadow);
-  padding: 16px;
-  margin-bottom: 16px;
+  /* no rounded corners by design */
 }
-.roi-row{
-  display:grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
-  gap:12px;
+.topbar-inner{
+  max-width:1220px;
+  margin:0 auto;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:16px;
 }
-@media (max-width: 900px){
-  .roi-row{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+.topbar .brand{
+  display:flex; align-items:center; gap:12px; min-width:0;
 }
-.kpi{
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 12px;
-  background: linear-gradient(180deg, #fff, #fafafa);
+.topbar .brand img{
+  height:34px; width:auto; display:block;
 }
-.kpi h4{
-  margin:0 0 6px 0; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
+.topbar .brand-title{
+  font-weight:800; font-size:20px; letter-spacing:.2px; margin:0;
 }
-.kpi .big{
-  font-size:22px; font-weight:700;
+.topbar .brand-sub{
+  margin:0; font-size:12px; opacity:.85;
 }
-.kpi.positive .big{ color:#057a55; } /* green */
-.kpi.negative .big{ color:#b42318; } /* red */
-.kpi.neutral .big{ color:#0f172a; }
-.kpi .sub{ font-size:12px; color: var(--muted); margin-top:4px; }
+
+/* Tabs */
+.topbar .tabs{
+  margin-left:auto;
+  display:flex; align-items:center; gap:8px;
+}
+.tab{
+  appearance:none;
+  border:1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.10);
+  color:#fff;
+  font-weight:600;
+  padding:8px 12px;
+  border-radius:10px;
+  text-decoration:none;
+  cursor:pointer;
+}
+.tab.active{
+  background:#fff;
+  color:#111827;
+}
+.tab[aria-disabled="true"]{
+  opacity:.45;
+  pointer-events:none;
+}
 
 /* ========================================================= */
-/* =========== Global Enablement Layout (50/50) ============ */
+/* =============== Layout & GPT shared styles ============== */
 /* ========================================================= */
 
+/* 50/50 layout */
 .layout-2col{
   display:grid;
-  grid-template-columns: 1fr 1fr; /* left: radars, right: GPT */
+  grid-template-columns: 1fr 1fr;
   gap:20px;
   align-items:start;
 }
 .left-col{ min-width:0; }
 .right-col{ min-width:0; }
 
-/* Slightly scale radar area so it comfortably fits half page */
+/* Slight scale to fit half page comfortably */
 .radar-scale{
   transform: scale(0.92);
   transform-origin: top left;
 }
 
-/* Keep GPT panel visible while scrolling on desktop */
+/* Sticky GPT panel */
 .sticky{ position: sticky; top: 16px; }
 
-/* ---- EnablementGPT UI helpers (shared across pages) ---- */
+/* EnablementGPT helpers */
 .gpt-head{ display:flex; align-items:center; gap:8px; padding:14px 16px; border-bottom:1px solid var(--line); }
 .gpt-title{ font-size:16px; font-weight:700; margin:0; }
 .gpt-badge{ margin-left:auto; font-size:12px; color:#059669; background:#ecfdf5; border:1px solid #a7f3d0; padding:2px 8px; border-radius:999px; }
@@ -160,7 +136,7 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 .gpt-btn{ padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#111827; color:#fff; font-weight:600; cursor:pointer; }
 .gpt-btn[disabled]{ background:#f3f4f6; color:#6b7280; cursor:default; }
 
-.gpt-presets{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; } /* gap before output */
+.gpt-presets{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
 .gpt-chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:12px; background:#fff; cursor:pointer; }
 .gpt-chip:hover{ background:#f9fafb; }
 
@@ -175,7 +151,7 @@ table th { font-weight: 600; font-size: 12px; color: var(--muted); text-transfor
 .gpt-actions{ display:flex; gap:8px; }
 .gpt-action{ border:1px solid var(--line); background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; font-size:12px; }
 
-/* --------- responsive --------- */
+/* Responsive */
 @media (max-width: 1024px){
   .layout-2col{ grid-template-columns: 1fr; }
   .sticky{ position: static; }
