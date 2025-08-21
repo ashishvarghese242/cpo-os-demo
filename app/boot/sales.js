@@ -61,7 +61,6 @@ function SalesPage({ cfg, hris, crm }) {
   return React.createElement(React.Fragment, null,
     React.createElement("header", null,
       React.createElement("div", { className:"brand" },
-        React.createElement("span", { className:"badge" }, "CPO OS"),
         React.createElement("div", null,
           React.createElement("h2", null, "Sales — Competency Radars"),
           React.createElement("div", { className:"tag" }, "Where we are vs where we need to be (benchmarked to top performers)")
