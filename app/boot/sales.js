@@ -29,7 +29,98 @@ function avg(arr){
   return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
 }
 
-function SalesPage({ cfg, hris, crm }) {
+/* ----------------------- Enablement Halo Helpers (non-breaking) ----------------------- */
+
+/** Top performers = top 25% by win_rate_uplift (fallbacks if missing). */
+function topPerformerIds(crm, percentile = 0.75){
+  const arr = Array.isArray(crm) ? crm.slice() : [];
+  if (!arr.length) return new Set();
+
+  const key =
+    (arr.some(r => typeof r.win_rate_uplift === "number") && "win_rate_uplift") ||
+    (arr.some(r => typeof r.margin_retention === "number") && "margin_retention") ||
+    (arr.some(r => typeof r.client_retention === "number") && "client_retention") ||
+    null;
+
+  if (!key) return new Set();
+
+  arr.sort((a,b) => (b[key]??-Infinity) - (a[key]??-Infinity));
+  const cutoff = Math.max(1, Math.floor(arr.length * (1 - percentile)) + 1);
+  const top = arr.slice(0, cutoff);
+  return new Set(top.map(r => r.person_id).filter(Boolean));
+}
+
+/** Normalize competency name for lookup. */
+function normCompKey(name){ return String(name || "").toLowerCase().trim(); }
+
+/** Extract content_id from various shapes. */
+function getContentId(item){
+  return item?.content_id ?? item?.contentId ?? item?.id ?? item?.content ?? null;
+}
+
+/** Extract competency tags from catalog items. */
+function getCompetencyTags(item){
+  const tags = item?.competencies ?? item?.tags ?? item?.labels ?? [];
+  if (!Array.isArray(tags)) return [];
+  return tags.map(t => String(t || "").toLowerCase().trim()).filter(Boolean);
+}
+
+/** Simple “consumed” rule for demo: completed/passed OR progress>=1 OR minutes>0 */
+function isConsumed(lrsRow){
+  const status = (lrsRow?.status || lrsRow?.state || "").toString().toLowerCase();
+  const progress = Number(lrsRow?.progress ?? lrsRow?.completion ?? 0);
+  const minutes = Number(lrsRow?.minutes ?? lrsRow?.duration_min ?? lrsRow?.duration ?? 0);
+  return status === "completed" || status === "passed" || progress >= 1 || minutes > 0;
+}
+
+/**
+ * Compute: competency(lower) -> % (0..1) of TOP performers who consumed any related content.
+ * lrs: [{ person_id, content_id, status/progress/minutes }]
+ * catalog: [{ content_id/id, competencies/tags: [...] }]
+ */
+function computeHaloPercentByCompetency({ lrs, catalog, topIds }){
+  const result = new Map();
+  if (!Array.isArray(lrs) || !Array.isArray(catalog) || !(topIds instanceof Set)) return result;
+
+  // Map content_id -> competencies
+  const contentToComps = new Map();
+  for (const row of catalog){
+    const cid = getContentId(row);
+    if (!cid) continue;
+    const tags = getCompetencyTags(row);
+    if (!tags.length) continue;
+    contentToComps.set(String(cid), new Set(tags));
+  }
+
+  // comp -> Set(person_id) among TOP only
+  const compToConsumers = new Map();
+  for (const rec of lrs){
+    const pid = rec?.person_id || rec?.user_id || rec?.learner_id || null;
+    if (!pid || !topIds.has(pid)) continue;
+    if (!isConsumed(rec)) continue;
+
+    const cid = getContentId(rec);
+    if (!cid) continue;
+
+    const comps = contentToComps.get(String(cid));
+    if (!comps || !comps.size) continue;
+
+    for (const comp of comps){
+      if (!compToConsumers.has(comp)) compToConsumers.set(comp, new Set());
+      compToConsumers.get(comp).add(pid);
+    }
+  }
+
+  const denom = Math.max(1, topIds.size);
+  for (const [comp, set] of compToConsumers.entries()){
+    result.set(comp, clamp(set.size / denom, 0, 1));
+  }
+  return result;
+}
+
+/* ----------------------- React Page ----------------------- */
+
+function SalesPage({ cfg, hris, crm, lrs, catalog }) {
   const { useMemo, useState } = React;
 
   const regions = Array.from(new Set(hris.filter(p=>p.org_unit==="Sales").map(p=>p.region))).filter(Boolean).sort();
@@ -40,25 +131,43 @@ function SalesPage({ cfg, hris, crm }) {
 
   const personIds = useMemo(()=> slicePeople(hris, cohortType, cohortKey), [hris, cohortType, cohortKey]);
 
+  // Lookups
+  const crmById = useMemo(() => new Map(crm.map(r => [r.person_id, r])), [crm]);
+  const topIds = useMemo(() => topPerformerIds(crm, 0.75), [crm]);
+
+  // Enablement halo % per competency (TOP performers only)
+  const haloPctByComp = useMemo(() => computeHaloPercentByCompetency({
+    lrs: Array.isArray(lrs) ? lrs : [],
+    catalog: Array.isArray(catalog) ? catalog : [],
+    topIds
+  }), [lrs, catalog, topIds]);
+
   const cards = useMemo(() => {
-    const byId = new Map(crm.map(r => [r.person_id, r]));
     return cfg.map(block => {
       const labels = block.metrics.map(m => m.label);
       const targetData = block.metrics.map(() => 5);
       const currentData = block.metrics.map(m => {
-        const vals = personIds.map(pid => byId.get(pid)?.[m.id]).filter(v => v!=null);
+        const vals = personIds.map(pid => crmById.get(pid)?.[m.id]).filter(v => v!=null);
         const raw = avg(vals);
         return norm(raw, m.floor, m.target, m.higher_is_better !== false);
       });
-      return { title: block.competency, labels, targetData, currentData };
+
+      // Halo overlay: % of top performers consuming related content → 0..5
+      const compKey = normCompKey(block.competency);
+      const pct = haloPctByComp.get(compKey) ?? 0;   // 0..1
+      const haloScaled = clamp(pct * 5, 0, 5);       // 0..5 for radar
+      const overlayData = labels.map(() => haloScaled);
+
+      return { title: block.competency, labels, targetData, currentData, overlayData };
     });
-  }, [cfg, crm, JSON.stringify(personIds)]);
+  }, [cfg, crmById, JSON.stringify(personIds), haloPctByComp]);
 
   const row1 = cards.slice(0,2);
   const row2 = cards.slice(2,4);
   const row3 = cards.slice(4,5);
 
   return React.createElement(React.Fragment, null,
+    // Keep your existing header/filters exactly as-is
     React.createElement("header", null,
       React.createElement("div", { className:"brand" },
         React.createElement("div", null,
@@ -95,13 +204,18 @@ function SalesPage({ cfg, hris, crm }) {
 
 (async function bootstrap(){
   try{
-    const [cfg, hris, crm] = await Promise.all([
+    const [cfg, hris, crm, lrs, catalog] = await Promise.all([
       json("./config/competencies/sales.json"),
       json("./data/hris.json"),
-      json("./data/crm.json")
+      json("./data/crm.json"),
+      // Optional sources; tolerate 404s and keep page working
+      fetch("./data/lrs.json").then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch("./data/content_catalog.json").then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
     const root = document.getElementById("app");
-    ReactDOM.createRoot(root).render(React.createElement(SalesPage, { cfg, hris, crm }));
+    ReactDOM.createRoot(root).render(
+      React.createElement(SalesPage, { cfg, hris, crm, lrs, catalog })
+    );
   }catch(e){
     const el = document.getElementById("app");
     el.innerHTML = `<div class="card"><h3>Sales page failed to load</h3><div class="muted">${e.message}</div></div>`;
